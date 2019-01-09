@@ -1,0 +1,9 @@
+apiVersion: launcher.fabric8.io/v1alpha1
+kind: Launcher
+metadata:
+  name: example-launcher
+spec:
+  github:
+    username: username
+    token: token
+  creator: false
