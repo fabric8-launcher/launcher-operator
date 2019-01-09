@@ -37,3 +37,10 @@ $ oc apply -f deploy/crds/launcher_v1alpha1_launcher_cr.yaml
 ```bash
 $ ./update-template.sh
 ```
+
+## Build and push to registry
+
+```bash
+$ operator-sdk build fabric8/launcher-operator:v0.0.1
+$ docker push fabric8/launcher-operator:v0.0.1
+```
