@@ -44,3 +44,17 @@ $ ./update-template.sh
 $ operator-sdk build fabric8/launcher-operator:v0.0.1
 $ docker push fabric8/launcher-operator:v0.0.1
 ```
+
+## Install the operator
+
+```bash
+# Setup Service Account
+$ oc create -f deploy/service_account.yaml
+# Setup RBAC
+$ oc create -f deploy/role.yaml
+$ oc create -f deploy/role_binding.yaml
+# Setup the CRD
+$ oc create -f deploy/crds/launcher_v1alpha1_launcher_crd.yaml
+# Deploy the app-operator
+$ oc create -f deploy/operator.yaml
+```
