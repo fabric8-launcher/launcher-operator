@@ -14,8 +14,26 @@ rules:
   - events
   - configmaps
   - secrets
+  - serviceaccounts
+  - processedtemplates.template.openshift.io
   verbs:
   - '*'
+- apiGroups:
+  - template.openshift.io
+  resources:
+  - processedtemplates
+  verbs: [ get, list, create, update, delete, deletecollection, watch]
+- apiGroups:
+  - apps.openshift.io
+  resources:
+  - deploymentconfigs
+  verbs: [ get, list, create, update, delete, deletecollection, watch]
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes
+  - routes/custom-host
+  verbs: [ get, list, create, update, delete, deletecollection, watch]
 - apiGroups:
   - ""
   resources:
