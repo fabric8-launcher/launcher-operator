@@ -41,3 +41,5 @@ spec:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
               value: "launcher-operator"
+            - name: TEMPLATE_PATH
+              value: "/usr/local/bin/templates"
