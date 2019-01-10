@@ -150,7 +150,7 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 	}
 
 	if isUpdated {
-		log.Info("The config has been updated, an new deployment should be triggered")
+		log.Info("The config has been updated, a new deployment should be triggered")
 		//TODO find a way to trigger a new deployment
 	}
 
@@ -167,9 +167,6 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 func (r *ReconcileLauncher) filterResourcesObjects(obj *runtime.Object) error {
 	if (*obj).(v1.Object).GetName() == "configmapcontroller" {
 		return fmt.Errorf("Ignoring confimapcontroller")
-	}
-	if (*obj).(v1.Object).GetName() == "launcher-clusters" {
-		return fmt.Errorf("Ignoring clusters")
 	}
 	return nil
 }
