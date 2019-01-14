@@ -24,9 +24,11 @@ rules:
   - processedtemplates
   verbs: [ get, list, create, update, delete, deletecollection, watch]
 - apiGroups:
+  - ""
   - apps.openshift.io
   resources:
   - deploymentconfigs
+  - deploymentconfigs/instantiate
   verbs: [ get, list, create, update, delete, deletecollection, watch]
 - apiGroups:
   - route.openshift.io
