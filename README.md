@@ -2,7 +2,34 @@
 
 This operator helps enabling the Launcher on an Openshift cluster.
 
-## To run for development using the operator-sdk (on Minishift)
+
+## Install the Launcher operator
+
+```bash
+# Setup Service Account
+$ oc create -f deploy/service_account.yaml
+# Setup RBAC
+$ oc create -f deploy/role.yaml
+$ oc create -f deploy/role_binding.yaml
+# Setup the CRD
+$ oc create -f deploy/crds/launcher_v1alpha1_launcher_crd.yaml
+# Deploy the app-operator
+$ oc create -f deploy/operator.yaml
+```
+
+## Create your Launcher
+
+1. Create your own launcher resource based on the [given example](./deploy/crds/launcher_v1alpha1_launcher_cr.yaml):
+2. Create in Openshift
+```bash
+$ oc create -f deploy/crds/launcher_v1alpha1_launcher_cr.yaml
+```
+
+## Example Launcher CR
+
+Find an example of the Launcher CR in `deploy/crds/launcher_v1alpha1_launcher_cr.yaml`
+
+## Develop
 
 Install the `operator-sdk` [here](https://github.com/operator-framework/operator-sdk).
 
@@ -21,40 +48,21 @@ Start the operator:
 operator-sdk up local --namespace myproject   
 ```
 
-## Example Launcher CR
+Then create your launcher resource and watch the logs in the console ouput.
 
-Find a example of the Launcher CR in `deploy/crds/launcher_v1alpha1_launcher_cr.yaml`
 
-## Apply the Launcher CR
 
-The operator and CRD need to be enabled, then:
-```bash
-$ oc apply -f deploy/crds/launcher_v1alpha1_launcher_cr.yaml
-```
-
-## To update the launcher template to it's latest version
+### Update the launcher template to the latest version from GitHub
 
 ```bash
 $ ./update-template.sh
 ```
 
-## Build and push to registry
+### Build and push the operator to registry
 
 ```bash
-$ operator-sdk build fabric8/launcher-operator:v0.0.1
-$ docker push fabric8/launcher-operator:v0.0.1
+$ operator-sdk build fabric8/launcher-operator:vX.Y.Z
+$ docker push fabric8/launcher-operator:vX.Y.Z
 ```
 
-## Install the operator
-
-```bash
-# Setup Service Account
-$ oc create -f deploy/service_account.yaml
-# Setup RBAC
-$ oc create -f deploy/role.yaml
-$ oc create -f deploy/role_binding.yaml
-# Setup the CRD
-$ oc create -f deploy/crds/launcher_v1alpha1_launcher_crd.yaml
-# Deploy the app-operator
-$ oc create -f deploy/operator.yaml
-```
+Update the version in [the operator yaml file](./deploy/operator.yaml) and push it.
