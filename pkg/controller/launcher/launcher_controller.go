@@ -10,6 +10,8 @@ import (
 	"strconv"
 
 	"github.com/integr8ly/operator-sdk-openshift-utils/pkg/api/template"
+	appsv1 "github.com/openshift/api/apps/v1"
+	appsv1client "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -151,7 +153,12 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	if isUpdated {
 		log.Info("The config has been updated, a new deployment should be triggered")
-		//TODO find a way to trigger a new deployment
+		for _, deploymentConfigName := range []string{"launcher-backend", "launcher-creator-backend", "launcher-frontend"} {
+			err = r.deployLatest(instance.Namespace, deploymentConfigName)
+			if err != nil {
+				return reconcile.Result{}, err
+			}
+		}
 	}
 
 	for _, o := range resourceObjects {
@@ -167,6 +174,24 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 func (r *ReconcileLauncher) filterResourcesObjects(obj *runtime.Object) error {
 	if (*obj).(v1.Object).GetName() == "configmapcontroller" {
 		return fmt.Errorf("Ignoring confimapcontroller")
+	}
+	return nil
+}
+
+func (r *ReconcileLauncher) deployLatest(namespace string, deploymentConfigName string) error {
+	appsClient, err := appsv1client.NewForConfig(r.config)
+	if err != nil {
+		return fmt.Errorf("Error while creating appsv1client: %s", err)
+	}
+	request := &appsv1.DeploymentRequest{
+		Name:   deploymentConfigName,
+		Latest: true,
+		Force:  true,
+	}
+	log.Info("Trigger deployment", "namespace", namespace, "deploymentConfigName", deploymentConfigName)
+	_, err = appsClient.DeploymentConfigs(namespace).Instantiate(deploymentConfigName, request)
+	if err != nil {
+		return fmt.Errorf("Error while deploying '%s': %s", deploymentConfigName, err)
 	}
 	return nil
 }
