@@ -25,13 +25,16 @@ $ oc create -f deploy/operator.yaml
 $ oc create -f deploy/crds/launcher_v1alpha1_launcher_cr.yaml
 ```
 
+
 ## Example Launcher CR
 
 Find an example of the Launcher CR in `deploy/crds/launcher_v1alpha1_launcher_cr.yaml`
 
+---
+
 ## Develop
 
-Install the `operator-sdk` [here](https://github.com/operator-framework/operator-sdk).
+Install the `operator-sdk` using [the instructions](https://github.com/operator-framework/operator-sdk).
 
 Register the crd:
 ```bash
@@ -51,12 +54,12 @@ operator-sdk up local --namespace myproject
 Then create your launcher resource and watch the logs in the console ouput.
 
 
-
 ### Update the launcher template to the latest version from GitHub
 
 ```bash
 $ ./update-template.sh
 ```
+
 
 ### Build and push the operator to registry
 
