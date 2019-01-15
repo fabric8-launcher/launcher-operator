@@ -301,8 +301,8 @@
   digest = "1:3e8b0f8d2ed4b10f83a0719c1e8853bdb4bbce2ca365aba2843dc9487e4ab35c"
   name = "github.com/openshift/client-go"
   packages = [
-    "build/clientset/versioned/scheme",
-    "build/clientset/versioned/typed/build/v1",
+    "apps/clientset/versioned/scheme",
+    "apps/clientset/versioned/typed/apps/v1",
   ]
   pruneopts = "NT"
   revision = "1fa528d3be060e4c7178eb69e76d37cf7e699e3c"
@@ -861,7 +861,8 @@
   input-imports = [
     "github.com/integr8ly/operator-sdk-openshift-utils/pkg/api/schemes",
     "github.com/integr8ly/operator-sdk-openshift-utils/pkg/api/template",
-    "github.com/openshift/client-go/build/clientset/versioned/typed/build/v1",
+    "github.com/openshift/api/apps/v1",
+    "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1",
     "github.com/operator-framework/operator-sdk/pkg/k8sutil",
     "github.com/operator-framework/operator-sdk/pkg/leader",
     "github.com/operator-framework/operator-sdk/pkg/ready",
