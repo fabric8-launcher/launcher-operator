@@ -11,16 +11,72 @@ import (
 type LauncherSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	GitHub         GitHubConfig `json:"github"`
 	CreatorEnabled bool         `json:"creator"`
+	Environment string `json:"environment"`
+	Catalog CatalogConfig `json:"catalog"`
+	OpenShift OpenShiftConfig `json:"openshift"`
+	Git         GitConfig `json:"git"`
+	Jms         JmsConfig `json:"jms"`
+	Keycloak    KeycloakConfig `json:"keycloak"`
+	Segment SegmentConfig `json:"segment"`
+	Sentry SentryConfig `json:"sentry"`
 }
 
-// GitHubConfig defines the GitHub configuration
-type GitHubConfig struct {
+type CatalogConfig struct {
+	Url string `json:"url"`
+	Ref string `json:"ref"`
+	Filter string `json:"filter"`
+	ReindexToken    string `json:"reindexToken"`
+}
+
+type OpenShiftConfig struct {
+	ApiUrl string `json:"apiUrl"`
+	ConsoleUrl string `json:"consoleUrl"`
+	SubscriptionToken string `json:"subscriptionToken"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Token    string `json:"token"`
+	Impersonate bool `json:"impersonate"`
+	Clusters []OpenShiftClusterConfig `json:"clusters"`
+}
+
+type OpenShiftClusterConfig struct {
+	Id string `json:"id"`
+	Name string `json:"name"`
+	ApiUrl string `json:"apiUrl"`
+	ConsoleUrl string `json:"consoleUrl"`
+	Type string `json:"type"`
+}
+
+// GitConfig defines the Git configuration
+type GitConfig struct {
+	Provider    string `json:"provider"`
+	Url 	string `json:"url"`
 	Username string `json:"username"`
 	Token    string `json:"token"`
 }
 
+type JmsConfig struct {
+	Url 	string `json:"url"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type KeycloakConfig struct {
+	Url 	string `json:"url"`
+	Realm 	string `json:"realm"`
+	ClientId	string `json:"clientId"`
+}
+
+type SegmentConfig struct {
+	Token string `json:"token"`
+}
+
+type SentryConfig struct {
+	CreatorToken string `json:"creatorToken"`
+	BackendToken string `json:"backendToken"`
+	FrontendToken string `json:"frontendToken"`
+}
 // LauncherStatus defines the observed state of Launcher
 type LauncherStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster

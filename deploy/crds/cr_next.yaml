@@ -2,26 +2,26 @@ apiVersion: launcher.fabric8.io/v1alpha1
 kind: Launcher
 metadata:
   name: example-launcher
-  environment: production
 spec:
   catalog:
-    repositoryUrl: http://github.com/fabric8-launcher/launcher-booster-catalog
-    repositoryRef: master
+    url: http://github.com/fabric8-launcher/launcher-booster-catalog
+    ref: master
     filter: filter expression
     reindexToken: token
   creator: false
+  environment: production
   openshift:
     apiUrl: apiUrl (default is the same cluster as the operator is installed)
     consoleUrl: consoleUrl
     subscriptionToken: token
     username: username
     password: password
+    impersonate: true
     token:
       valueFrom:
         secretKeyRef:
           name: openshift-test-secret
           key: token
-    impersonate: true
     clusters:
       - id: starter-us-east-1
         name: "Starter: US East (Virginia)"
