@@ -46,9 +46,14 @@ Install dependencies:
 $ dep ensure -v
 ```
 
-Start the operator:
+Start the operator (just restart this command to apply your changes):
 ```bash 
 operator-sdk up local --namespace myproject   
+```
+
+Run this command when changing the API types (pkg/apis/launcher/v1alpha1/launcher_types.go)
+```bash 
+operator-sdk generate k8s
 ```
 
 Then create your launcher resource and watch the logs in the console ouput.
