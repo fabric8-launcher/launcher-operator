@@ -183,5 +183,8 @@ tags
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 .history
-
-# End of https://www.gitignore.io/api/go,vim,emacs,intellij+all,visualstudiocode
+# End of https://www.gitignore.io/api/go,vim,emacs,visualstudiocode
+vendor/
+### Goland ###
+.idea/
+>>>>>>> update: source launcher template
