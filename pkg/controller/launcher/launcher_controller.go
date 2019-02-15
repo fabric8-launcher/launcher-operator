@@ -141,8 +141,18 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 	data["launcher.missioncontrol.openshift.console.url"] = url
 	data["launcher.keycloak.url"] = ""
 	data["launcher.keycloak.realm"] = ""
-	data["launcher.missioncontrol.github.username"] = instance.Spec.GitHub.Username
-	data["launcher.missioncontrol.github.token"] = instance.Spec.GitHub.Token
+	if instance.Spec.Git.Provider != "" && instance.Spec.Git.Provider != "github" {
+		return reconcile.Result{}, fmt.Errorf("in this version, the only supported git provider is github")
+	}
+	data["launcher.missioncontrol.github.username"] = instance.Spec.Git.Username
+
+	token, err := r.getSensitiveValue(instance.Namespace, instance.Spec.Git.Token)
+
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	data["launcher.missioncontrol.github.token"] = token
 	data["launcher.creator.enabled"] = strconv.FormatBool(instance.Spec.CreatorEnabled)
 
 	isUpdated, err := r.updateConfigIfChanged(instance, configMap)
@@ -173,7 +183,7 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 
 func (r *ReconcileLauncher) filterResourcesObjects(obj *runtime.Object) error {
 	if (*obj).(v1.Object).GetName() == "configmapcontroller" {
-		return fmt.Errorf("Ignoring confimapcontroller")
+		return fmt.Errorf("ignoring confimapcontroller")
 	}
 	return nil
 }
@@ -181,7 +191,7 @@ func (r *ReconcileLauncher) filterResourcesObjects(obj *runtime.Object) error {
 func (r *ReconcileLauncher) deployLatest(namespace string, deploymentConfigName string) error {
 	appsClient, err := appsv1client.NewForConfig(r.config)
 	if err != nil {
-		return fmt.Errorf("Error while creating appsv1client: %s", err)
+		return fmt.Errorf("error while creating appsv1client: %s", err)
 	}
 	request := &appsv1.DeploymentRequest{
 		Name:   deploymentConfigName,
@@ -191,7 +201,7 @@ func (r *ReconcileLauncher) deployLatest(namespace string, deploymentConfigName 
 	log.Info("Trigger deployment", "namespace", namespace, "deploymentConfigName", deploymentConfigName)
 	_, err = appsClient.DeploymentConfigs(namespace).Instantiate(deploymentConfigName, request)
 	if err != nil {
-		return fmt.Errorf("Error while deploying '%s': %s", deploymentConfigName, err)
+		return fmt.Errorf("error while deploying '%s': %s", deploymentConfigName, err)
 	}
 	return nil
 }
@@ -228,7 +238,7 @@ func (r *ReconcileLauncher) updateConfigIfChanged(cr *launcherv1alpha1.Launcher,
 	configMapResource.(v1.Object).SetNamespace(cr.Namespace)
 	err := controllerutil.SetControllerReference(cr, configMapResource.(v1.Object), r.scheme)
 	if err != nil {
-		return false, fmt.Errorf("Error setting the custom resource as owner: %s", err)
+		return false, fmt.Errorf("error setting the custom resource as owner: %s", err)
 	}
 	retrievedResource := configMapResource.DeepCopyObject()
 	err = r.client.Get(context.TODO(), selector, retrievedResource)
@@ -240,7 +250,7 @@ func (r *ReconcileLauncher) updateConfigIfChanged(cr *launcherv1alpha1.Launcher,
 			"kind", configMapResource.GetObjectKind().GroupVersionKind().Kind)
 		err = r.client.Update(context.TODO(), configMapResource)
 		if err != nil {
-			return false, fmt.Errorf("Error updating ConfigMap: %s", err)
+			return false, fmt.Errorf("error updating ConfigMap: %s", err)
 		}
 		return true, nil
 	}
@@ -256,7 +266,7 @@ func (r *ReconcileLauncher) createLauncherResource(cr *launcherv1alpha1.Launcher
 	err := controllerutil.SetControllerReference(cr, resource.(v1.Object), r.scheme)
 
 	if err != nil {
-		return fmt.Errorf("Error setting the custom resource as owner: %s", err)
+		return fmt.Errorf("error setting the custom resource as owner: %s", err)
 	}
 
 	// Try to find the template, it may already exist
@@ -281,11 +291,32 @@ func (r *ReconcileLauncher) createLauncherResource(cr *launcherv1alpha1.Launcher
 			"kind", resource.GetObjectKind().GroupVersionKind().Kind)
 		err = r.client.Create(context.TODO(), resource)
 		if err != nil {
-			return fmt.Errorf("Error creating resource: %s", err)
+			return fmt.Errorf("error creating resource: %s", err)
 		}
 	} else {
-		return fmt.Errorf("Error reading resource '%s': %s", resource.(v1.Object).GetName(), err)
+		return fmt.Errorf("error reading resource '%s': %s", resource.(v1.Object).GetName(), err)
 	}
 
 	return nil
+}
+
+func (r *ReconcileLauncher) getSensitiveValue(namespace string, sensitiveValue launcherv1alpha1.SensitiveValue) (string, error) {
+	if sensitiveValue.ValueFrom.SecretKeyRef != (launcherv1alpha1.SecretKeyRef{}) {
+		secret := &corev1.Secret{}
+		key := sensitiveValue.ValueFrom.SecretKeyRef.Key
+		name := sensitiveValue.ValueFrom.SecretKeyRef.Name
+		err := r.client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: namespace}, secret)
+		if err != nil {
+			return "", err
+		}
+		value := secret.Data[key]
+		if value == nil {
+			return "", fmt.Errorf("key '%s' not found in secret '%s'", key, name)
+		}
+		return string(value), nil
+	}
+	if sensitiveValue.ValueFrom.Text != "" {
+		return sensitiveValue.ValueFrom.Text, nil
+	}
+	return "", fmt.Errorf("invalid sensitive value definition")
 }

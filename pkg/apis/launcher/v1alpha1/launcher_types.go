@@ -11,14 +11,32 @@ import (
 type LauncherSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	GitHub         GitHubConfig `json:"github"`
+	Git         GitConfig `json:"git"`
 	CreatorEnabled bool         `json:"creator"`
 }
 
-// GitHubConfig defines the GitHub configuration
-type GitHubConfig struct {
+// GitConfig defines the Git configuration
+type GitConfig struct {
+	Provider string `json:"provider,omitempty"`
 	Username string `json:"username"`
-	Token    string `json:"token"`
+	Token    SensitiveValue `json:"token,omitempty"`
+}
+
+// SensitiveValue defines a sensitive value
+type SensitiveValue struct {
+	ValueFrom  ValueFrom `json:"valueFrom"`
+}
+
+// ValueFrom defines where the value is read from
+type ValueFrom struct {
+	SecretKeyRef    SecretKeyRef `json:"secretKeyRef,omitempty"`
+	Text    string `json:"text,omitempty"`
+}
+
+// SecretKeyRef defines how the retrieve the secret value
+type SecretKeyRef struct {
+	Key    string `json:"key"`
+	Name    string `json:"name"`
 }
 
 // LauncherStatus defines the observed state of Launcher

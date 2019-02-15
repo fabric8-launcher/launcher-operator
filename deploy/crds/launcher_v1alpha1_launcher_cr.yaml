@@ -3,7 +3,13 @@ kind: Launcher
 metadata:
   name: example-launcher
 spec:
-  github:
+  git:
+    provider: github
     username: username
-    token: token
+    token:
+      valueFrom:
+        secretKeyRef:
+          name: launcher-secrets
+          key: github-token
+        text: token (you can use this instead of secretKeyRef)
   creator: false
