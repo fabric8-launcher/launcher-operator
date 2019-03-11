@@ -5,10 +5,6 @@ import (
 	launcherv1alpha1 "fabric8-launcher/launcher-operator/pkg/apis/launcher/v1alpha1"
 	"fabric8-launcher/launcher-operator/pkg/helper"
 	"fmt"
-	"os"
-	"reflect"
-	"strconv"
-
 	"github.com/integr8ly/operator-sdk-openshift-utils/pkg/api/template"
 	appsv1 "github.com/openshift/api/apps/v1"
 	appsv1client "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
@@ -18,6 +14,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
+	"os"
+	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -153,7 +151,6 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 	}
 
 	data["launcher.missioncontrol.github.token"] = token
-	data["launcher.creator.enabled"] = strconv.FormatBool(instance.Spec.CreatorEnabled)
 
 	isUpdated, err := r.updateConfigIfChanged(instance, configMap)
 

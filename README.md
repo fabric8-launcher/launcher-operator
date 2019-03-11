@@ -3,7 +3,22 @@
 This operator helps enabling the Launcher on an Openshift cluster.
 
 
+## Give cluster admin permissions to the user <user>:
+
+The user needs cluster-admin permissions to install the Launcher operator
+
+```bash
+$ oc adm policy --as system:admin add-cluster-role-to-user cluster-admin <user>
+```
+
 ## Install the Launcher operator
+
+Login with the OpenShift client using a user with cluster-admin permissions.
+```bash
+$ oc login
+```
+
+Choose the project that will run the operator and then install it:
 
 ```bash
 # Setup Service Account
@@ -17,13 +32,22 @@ $ oc create -f deploy/crds/launcher_v1alpha1_launcher_crd.yaml
 $ oc create -f deploy/operator.yaml
 ```
 
-## Create your Launcher
+## Install the Launcher (via the installed operator)
 
-1. Create your own launcher resource based on the [given example](./deploy/crds/launcher_v1alpha1_launcher_cr.yaml):
-2. Create in Openshift
+
+1. Log into GitHub and generate a personal access token for use here:
+--  https://github.com/settings/tokens
+    * Set scopes
+        * `repo`
+        * `admin:repo_hook`
+        * `delete_repo`
+2. Create your own launcher resource based on the [given example](./deploy/crds/launcher_v1alpha1_launcher_cr.yaml):
+3. Add your GitHub personal token (using a Secret `valueFrom: secretKeyRef: ...` or directly `valueFrom: text: ...`)
+4. Add your CR to Openshift
 ```bash
-$ oc create -f deploy/crds/launcher_v1alpha1_launcher_cr.yaml
+$ oc create -f <your_launcher_cr.yaml>
 ```
+5. Browse the console to see a new Route to the launcher
 
 
 ## Example Launcher CR

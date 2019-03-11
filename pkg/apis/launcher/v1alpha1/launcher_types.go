@@ -12,7 +12,6 @@ type LauncherSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	Git         GitConfig `json:"git"`
-	CreatorEnabled bool         `json:"creator"`
 }
 
 // GitConfig defines the Git configuration
