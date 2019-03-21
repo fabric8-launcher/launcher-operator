@@ -18,6 +18,12 @@ Login with the OpenShift client using a user with cluster-admin permissions.
 $ oc login
 ```
 
+Clone this repository:
+```bash
+$ git clone https://github.com/fabric8-launcher/launcher-operator
+$ cd fabric8-launcher/launcher-operator
+```
+
 Choose the project that will run the operator and then install all the operator resources:
 
 ```bash
