@@ -142,7 +142,6 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 	if instance.Spec.Git.Provider != "" && instance.Spec.Git.Provider != "github" {
 		return reconcile.Result{}, fmt.Errorf("in this version, the only supported git provider is github")
 	}
-	data["launcher.missioncontrol.github.username"] = instance.Spec.Git.Username
 
 	token, err := r.getSensitiveValue(instance.Namespace, instance.Spec.Git.Token)
 

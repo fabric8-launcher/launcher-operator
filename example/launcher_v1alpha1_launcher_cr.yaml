@@ -5,7 +5,6 @@ metadata:
 spec:
   git:
     provider: github
-    username: username
     token:
       valueFrom:
         secretKeyRef:
