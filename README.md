@@ -45,9 +45,10 @@ oc create -R -f ./deploy
 ```bash
 $ oc create -f <your_launcher_cr.yaml>
 ```
-5. Browse the OpenShift Console to see a find the Route to the launcher.
-
-
+5. Get the Launcher URL:
+```bash
+$ oc get route launcher --template={{.spec.host}}
+```
 
 ## Example Launcher CR
 
