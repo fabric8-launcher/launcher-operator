@@ -29,7 +29,7 @@ oc create -R -f ./deploy
 
 1. Log into GitHub and generate a personal access token for the Launcher:
 --  https://github.com/settings/tokens
-    * S et scopes
+    * Set scopes
         * `repo`
         * `admin:repo_hook`
         * `delete_repo`
