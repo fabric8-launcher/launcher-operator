@@ -17,7 +17,6 @@ type LauncherSpec struct {
 // GitConfig defines the Git configuration
 type GitConfig struct {
 	Provider string `json:"provider,omitempty"`
-	Username string `json:"username"`
 	Token    SensitiveValue `json:"token,omitempty"`
 }
 
