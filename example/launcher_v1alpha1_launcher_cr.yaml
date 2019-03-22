@@ -10,4 +10,3 @@ spec:
         secretKeyRef:
           name: launcher-secrets
           key: github-token
-        text: token (you can use this instead of secretKeyRef)
