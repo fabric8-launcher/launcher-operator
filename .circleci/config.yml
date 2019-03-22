@@ -18,5 +18,6 @@ jobs:
             git checkout master
             make dep
             make install
-      - run: operator-sdk build /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}} 
-      - run: operator-sdk tests local /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}} 
+      - run: go get github.com/fabric8-launcher/launcher-operator
+      - run: operator-sdk build $GOPATH/src/github.com/fabric8-launcher/launcher-operator
+      - run: operator-sdk tests local $GOPATH/src/github.com/fabric8-launcher/launcher-operator 
