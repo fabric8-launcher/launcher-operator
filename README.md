@@ -27,7 +27,7 @@ $ cd launcher-operator
 Choose the project that will run the operator and then install all the operator resources:
 
 ```bash
-oc create -R -f ./deploy 
+$ oc create -R -f ./deploy 
 ```
 
 ## Install the Launcher (via the installed operator)
@@ -39,13 +39,18 @@ oc create -R -f ./deploy
         * `repo`
         * `admin:repo_hook`
         * `delete_repo`
-2. Copy the example CR based on the [given example](example/launcher_v1alpha1_launcher_cr.yaml):
-3. Add your GitHub personal token (using a Secret `valueFrom: secretKeyRef: ...` or directly `valueFrom: text: ...`)
-4. Add your CR to OpenShift
+
+2. Create a secret for your personal Github token
 ```bash
-$ oc create -f <your_launcher_cr.yaml>
+$ oc create secret generic launcher-secrets --from-literal=github-token=<YOUR_GITHUB_TOKEN>
 ```
-5. Get the Launcher URL:
+
+3. Add your CR to OpenShift
+```bash
+$ oc create -f example/launcher_v1alpha1_launcher_cr.yaml
+```
+
+4. Get the Launcher URL:
 ```bash
 $ oc get route launcher --template={{.spec.host}}
 ```
