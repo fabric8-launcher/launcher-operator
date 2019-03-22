@@ -18,5 +18,5 @@ jobs:
             git checkout master
             make dep
             make install
-      - run: operator-sdk build .
-      - run: operator-sdk tests local .
+      - run: dep ensure -v
+      - run: operator-sdk generate k8s
