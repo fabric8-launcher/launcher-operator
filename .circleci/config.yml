@@ -5,18 +5,24 @@ jobs:
       # specify the version
       - image: circleci/golang:1.12
 
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    working_directory: /go/src/github.com/fabric8-launcher/launcher-operator
     steps:
       - checkout
+      - setup_remote_docker
       - run:
          name: Install operator-framework
          command: |
-            mkdir -p $GOPATH/src/github.com/operator-framework
-            cd $GOPATH/src/github.com/operator-framework
-            git clone https://github.com/operator-framework/operator-sdk
-            cd operator-sdk
-            git checkout master
-            make dep
-            make install
-      - run: dep ensure -v
+            RELEASE_VERSION=v0.9.0
+            curl -OJL https://github.com/operator-framework/operator-sdk/releases/download/${RELEASE_VERSION}/operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu
+            chmod +x operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu && sudo cp operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu /usr/local/bin/operator-sdk && rm operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu
       - run: operator-sdk generate k8s
+      - run: operator-sdk build fabric8/launcher-operator:latest
+      # build and push Docker image
+      - run: 
+          name: Build and push to Dockerhub
+          command: |
+            TAG=$(echo $GIT_COMMIT | cut -c1-7)
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker tag fabric8/launcher-operator:latest fabric8/launcher-operator:$TAG
+            docker push fabric8/launcher-operator:latest
+            docker push fabric8/launcher-operator:$TAG
