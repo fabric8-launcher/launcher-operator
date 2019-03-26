@@ -12,6 +12,13 @@ type LauncherSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	Git         GitConfig `json:"git"`
+	OpenShift OpenShiftConfig `json:"openshift,omitempty"`
+
+}
+
+// OpenShiftConfig defines the OpenShift configuration
+type OpenShiftConfig struct {
+	ConsoleUrl string `json:"consoleUrl,omitempty"`
 }
 
 // GitConfig defines the Git configuration

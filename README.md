@@ -47,7 +47,7 @@ $ oc create secret generic launcher-secrets --from-literal=github-token=<YOUR_GI
 
 3. Add your CR to OpenShift
 ```bash
-$ oc create -f example/launcher_v1alpha1_launcher_cr.yaml
+$ oc create -f example/launcher_cr.yaml
 ```
 
 4. Get the Launcher URL:
@@ -57,7 +57,7 @@ $ oc get route launcher --template={{.spec.host}}
 
 ## Example Launcher CR
 
-Find an example of the Launcher CR in `example/launcher_v1alpha1_launcher_cr.yaml`
+Find an example of the Launcher CR in `example/launcher_cr.yaml`
 
 ---
 

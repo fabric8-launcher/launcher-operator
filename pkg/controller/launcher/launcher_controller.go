@@ -136,7 +136,9 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 	data := configMap.Data
 	data["launcher.frontend.targetenvironment.skip"] = "true"
 	data["launcher.missioncontrol.openshift.api.url"] = url
-	data["launcher.missioncontrol.openshift.console.url"] = url
+	if &instance.Spec.OpenShift != nil && instance.Spec.OpenShift.ConsoleUrl != "" {
+		data["launcher.missioncontrol.openshift.console.url"] = instance.Spec.OpenShift.ConsoleUrl
+	}
 	data["launcher.keycloak.url"] = ""
 	data["launcher.keycloak.realm"] = ""
 	if instance.Spec.Git.Provider != "" && instance.Spec.Git.Provider != "github" {
