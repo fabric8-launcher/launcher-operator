@@ -1,4 +1,4 @@
-package v1alpha1
+package v1alpha2
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -11,37 +11,41 @@ import (
 type LauncherSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	Git         GitConfig `json:"git"`
+	GitHub    GitHubConfig    `json:"github"`
 	OpenShift OpenShiftConfig `json:"openshift,omitempty"`
+	OAuth     OAuthConfig     `json:"oauth,omitempty"`
+}
 
+// OAuthConfig defines the OAuth configuration
+type OAuthConfig struct {
+	Enabled bool `json:"enabled"`
 }
 
 // OpenShiftConfig defines the OpenShift configuration
 type OpenShiftConfig struct {
-	ConsoleUrl string `json:"consoleUrl,omitempty"`
+	ConsoleURL string `json:"consoleUrl,omitempty"`
 }
 
-// GitConfig defines the Git configuration
-type GitConfig struct {
-	Provider string `json:"provider,omitempty"`
-	Token    SensitiveValue `json:"token,omitempty"`
+// GitHubConfig defines the Git configuration
+type GitHubConfig struct {
+	Token SensitiveValue `json:"token,omitempty"`
 }
 
 // SensitiveValue defines a sensitive value
 type SensitiveValue struct {
-	ValueFrom  ValueFrom `json:"valueFrom"`
+	ValueFrom ValueFrom `json:"valueFrom"`
 }
 
 // ValueFrom defines where the value is read from
 type ValueFrom struct {
-	SecretKeyRef    SecretKeyRef `json:"secretKeyRef,omitempty"`
-	Text    string `json:"text,omitempty"`
+	SecretKeyRef SecretKeyRef `json:"secretKeyRef,omitempty"`
+	Text         string       `json:"text,omitempty"`
 }
 
 // SecretKeyRef defines how the retrieve the secret value
 type SecretKeyRef struct {
-	Key    string `json:"key"`
-	Name    string `json:"name"`
+	Key  string `json:"key"`
+	Name string `json:"name"`
 }
 
 // LauncherStatus defines the observed state of Launcher

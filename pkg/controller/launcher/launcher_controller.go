@@ -2,9 +2,12 @@ package launcher
 
 import (
 	"context"
-	launcherv1alpha1 "fabric8-launcher/launcher-operator/pkg/apis/launcher/v1alpha1"
+	launcherApi "fabric8-launcher/launcher-operator/pkg/apis/launcher/v1alpha2"
 	"fabric8-launcher/launcher-operator/pkg/helper"
 	"fmt"
+	"os"
+	"reflect"
+
 	"github.com/integr8ly/operator-sdk-openshift-utils/pkg/api/template"
 	appsv1 "github.com/openshift/api/apps/v1"
 	appsv1client "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
@@ -14,8 +17,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
-	"os"
-	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -55,7 +56,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Launcher
-	err = c.Watch(&source.Kind{Type: &launcherv1alpha1.Launcher{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &launcherApi.Launcher{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -64,7 +65,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to secondary resource Pods and requeue the owner Launcher
 	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &launcherv1alpha1.Launcher{},
+		OwnerType:    &launcherApi.Launcher{},
 	})
 	if err != nil {
 		return err
@@ -95,7 +96,7 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 	log.Info("Reconciling Launcher\n", "Namespace", request.Namespace, "Name", request.Name)
 
 	// Fetch the Launcher instance
-	instance := &launcherv1alpha1.Launcher{}
+	instance := &launcherApi.Launcher{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -136,22 +137,26 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 	data := configMap.Data
 	data["launcher.frontend.targetenvironment.skip"] = "true"
 	data["launcher.missioncontrol.openshift.api.url"] = url
-	if &instance.Spec.OpenShift != nil && instance.Spec.OpenShift.ConsoleUrl != "" {
-		data["launcher.missioncontrol.openshift.console.url"] = instance.Spec.OpenShift.ConsoleUrl
+	if &instance.Spec.OpenShift != nil && instance.Spec.OpenShift.ConsoleURL != "" {
+		data["launcher.missioncontrol.openshift.console.url"] = instance.Spec.OpenShift.ConsoleURL
 	}
 	data["launcher.keycloak.url"] = ""
 	data["launcher.keycloak.realm"] = ""
-	if instance.Spec.Git.Provider != "" && instance.Spec.Git.Provider != "github" {
-		return reconcile.Result{}, fmt.Errorf("in this version, the only supported git provider is github")
+
+	if &instance.Spec.OAuth != nil && instance.Spec.OAuth.Enabled {
+		if &instance.Spec.OpenShift == nil || instance.Spec.OpenShift.ConsoleURL == "" {
+			return reconcile.Result{}, fmt.Errorf("OpenShift ConsoleUrl must be defined to use OAuth")
+		}
+		data["launcher.oauth.openshift.url"] = instance.Spec.OpenShift.ConsoleURL + "/oauth/authorize"
+	} else if &instance.Spec.GitHub.Token != nil {
+		token, err := r.getSensitiveValue(instance.Namespace, instance.Spec.GitHub.Token)
+
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		data["launcher.missioncontrol.github.token"] = token
 	}
-
-	token, err := r.getSensitiveValue(instance.Namespace, instance.Spec.Git.Token)
-
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	data["launcher.missioncontrol.github.token"] = token
 
 	isUpdated, err := r.updateConfigIfChanged(instance, configMap)
 
@@ -227,7 +232,7 @@ func (r *ReconcileLauncher) findObjectByKindAndName(objects []runtime.Object, na
 	return nil
 }
 
-func (r *ReconcileLauncher) updateConfigIfChanged(cr *launcherv1alpha1.Launcher, configMapResource runtime.Object) (bool, error) {
+func (r *ReconcileLauncher) updateConfigIfChanged(cr *launcherApi.Launcher, configMapResource runtime.Object) (bool, error) {
 	// Try to find the template, it may already exist
 	selector := types.NamespacedName{
 		Namespace: cr.Namespace,
@@ -256,7 +261,7 @@ func (r *ReconcileLauncher) updateConfigIfChanged(cr *launcherv1alpha1.Launcher,
 	return false, nil
 }
 
-func (r *ReconcileLauncher) createLauncherResource(cr *launcherv1alpha1.Launcher, resource runtime.Object) error {
+func (r *ReconcileLauncher) createLauncherResource(cr *launcherApi.Launcher, resource runtime.Object) error {
 
 	resource.(v1.Object).SetNamespace(cr.Namespace)
 	// Set the CR as the owner of this resource so that when
@@ -298,8 +303,8 @@ func (r *ReconcileLauncher) createLauncherResource(cr *launcherv1alpha1.Launcher
 	return nil
 }
 
-func (r *ReconcileLauncher) getSensitiveValue(namespace string, sensitiveValue launcherv1alpha1.SensitiveValue) (string, error) {
-	if sensitiveValue.ValueFrom.SecretKeyRef != (launcherv1alpha1.SecretKeyRef{}) {
+func (r *ReconcileLauncher) getSensitiveValue(namespace string, sensitiveValue launcherApi.SensitiveValue) (string, error) {
+	if sensitiveValue.ValueFrom.SecretKeyRef != (launcherApi.SecretKeyRef{}) {
 		secret := &corev1.Secret{}
 		key := sensitiveValue.ValueFrom.SecretKeyRef.Key
 		name := sensitiveValue.ValueFrom.SecretKeyRef.Name

@@ -1,18 +1,13 @@
-apiVersion: launcher.fabric8.io/v1alpha1
+apiVersion: launcher.fabric8.io/v1alpha2
 kind: Launcher
 metadata:
   name: launcher
 spec:
 
-####### OpenShift Configuration (optional)
-#  openshift:
-#    consoleUrl: <the OpenShift Console Url (ex: 'https://192.168.64.4:8443')>
+####### OpenShift Configuration
+  openshift:
+    consoleUrl: #<the OpenShift Console Url (ex: 'https://192.168.64.4:8443')>#
 
-####### Git Configuration
-  git:
-    provider: github
-    token:
-      valueFrom:
-        secretKeyRef:
-          name: launcher-secrets
-          key: github-token
+####### OAuth Configuration
+  oauth:
+    enabled: true
