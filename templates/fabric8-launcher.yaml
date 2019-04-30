@@ -254,7 +254,6 @@ parameters:
 - name: LAUNCHER_OAUTH_GITHUB_CLIENT_ID
   displayName: GitHub Oauth Client ID
   description: The GitHub Oauth Client ID to use for GitHub authentication
-  value: launcher
 - name: LAUNCHER_OAUTH_GITHUB_SECRET
   displayName: GitHub Oauth Secret
   description: The GitHub Oauth Secret to use for GitHub authentication
