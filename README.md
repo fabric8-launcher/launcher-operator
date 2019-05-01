@@ -60,7 +60,7 @@ $ oc create -f <(echo '
     name: launcher
   secret: <CHANGE_IT>
   redirectURIs:
-    - "https://<your frontend hostname>/"
+    - "http://<your frontend hostname>/"
   grantMethod: prompt
   ')
 ```
