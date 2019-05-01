@@ -32,20 +32,16 @@ $ oc create -R -f ./deploy
 
 ## Install the Launcher (via the installed operator)
 
+1. Log into GitHub and create a OAuth Application for the Launcher named 'launcher':
+--  https://github.com/settings/applications/new
+    * Using `http://temporary` as 'Homepage URL' an 'Authorization callback URL' (You will know the frontend url later)
 
-1. Log into GitHub and generate a personal access token for the Launcher:
---  https://github.com/settings/tokens
-    * Set scopes
-        * `repo`
-        * `admin:repo_hook`
-        * `delete_repo`
-
-2. Create a secret for your personal Github token
+2. Create a secret for your GitHub Oauth settings
 ```bash
-$ oc create secret generic launcher-secrets --from-literal=github-token=<YOUR_GITHUB_TOKEN>
+$ oc create secret generic launcher-oauth-github --from-literal=clientId=<YOUR_GITHUB_OAUTH_APP_CLIENT_ID> --from-literal=secret=<YOUR_GITHUB_OAUTH_APP_CLIENT_SECRET>
 ```
 
-3. Add your CR to OpenShift
+3. Customize the Launcher Resource with you OpenShift Console URL and create it
 ```bash
 $ oc create -f example/launcher_cr.yaml
 ```
@@ -54,6 +50,22 @@ $ oc create -f example/launcher_cr.yaml
 ```bash
 $ oc get route launcher --template={{.spec.host}}
 ```
+
+5. Create a OAuth client in OpenShift:
+```bash
+$ oc create -f <(echo '
+  kind: OAuthClient
+  apiVersion: oauth.openshift.io/v1
+  metadata:
+    name: launcher
+  secret: <CHANGE_IT>
+  redirectURIs:
+    - "http://<your frontend hostname>/"
+  grantMethod: prompt
+  ')
+```
+
+6. Edit you GitHub OAuth application with the frontend URL as 'Homepage URL' an 'Authorization callback URL'
 
 ## Example Launcher CR
 
@@ -67,7 +79,7 @@ Install the `operator-sdk` using [the instructions](https://github.com/operator-
 
 Register the crd:
 ```bash
-$ oc create -f deploy/crds/launcher_v1alpha1_launcher_crd.yaml  
+$ oc create -f deploy/crds/launcher_v1alpha2_launcher_crd.yaml  
 ```
 
 Install dependencies:
@@ -80,7 +92,7 @@ Start the operator (just restart this command to apply your changes):
 operator-sdk up local --namespace myproject   
 ```
 
-Run this command when changing the API types (pkg/apis/launcher/v1alpha1/launcher_types.go)
+Run this command when changing the API types (pkg/apis/launcher/v1alpha2/launcher_types.go)
 ```bash 
 operator-sdk generate k8s
 ```

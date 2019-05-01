@@ -63,6 +63,9 @@ parameters:
   description: The keycloak client id to be used in the frontend (leave empty if you've explicitly specified
     GitHub/OpenShift authentication above)
   value:
+- name: LAUNCHER_OAUTH_OPENSHIFT_URL
+  displayName: OpenShift OAuth Url
+  description: The OpenShift Oauth Url to use for cluster authentication
 - name: LAUNCHER_TRACKER_SEGMENT_TOKEN
   displayName: Segment Token
   description: The token to use for Segment tracking. Leaving this empty will disable
@@ -114,44 +117,45 @@ parameters:
   displayName: Git Provider
   description: The Git provider to be used by Launcher (defaults to GitHub)
   value: GITHUB
+- name: LAUNCHER_FILTER_RUNTIME
+  displayName: Filter runtimes
+  description: A regular expression that will be used to match against the id field of each runtime. You can prepend `!` in the expression to negate.
+  value:
+- name: LAUNCHER_FILTER_VERSION
+  displayName: Filter versions
+  description: A regular expression that will be used to match against the id field of each version. You can prepend `!` in the expression to negate.
+  value:
 - name: BACKEND_IMAGE
   value: fabric8/launcher-backend
   required: true
-
 - name: BACKEND_IMAGE_TAG
   value: latest
   required: true
-
 - description: CPU request
   displayName: CPU request
   required: true
   name: BACKEND_CPU_REQUEST
-  value: "10m"
-
+  value: 10m
 - description: CPU limit
   displayName: CPU limit
   required: true
   name: BACKEND_CPU_LIMIT
-  value: "1000m"
-
+  value: 1000m
 - description: Memory request
   displayName: Memory request
   required: true
   name: BACKEND_MEMORY_REQUEST
-  value: "768Mi"
-
+  value: 768Mi
 - description: Memory limit
   displayName: Memory limit
   required: true
   name: BACKEND_MEMORY_LIMIT
-  value: "2G"
-
+  value: 2G
 - description: Number of deployment replicas
   displayName: Number of deployment replicas
   required: true
   name: BACKEND_REPLICAS
-  value: "1"
-
+  value: '1'
 - name: WELCOME_IMAGE_NAME
   description: The Welcome App's image name
   displayName: Image Name
@@ -205,41 +209,34 @@ parameters:
 - name: FRONTEND_IMAGE
   value: fabric8/launcher-frontend
   required: true
-
 - name: FRONTEND_IMAGE_TAG
   value: latest
   required: true
-
 - description: CPU request
   displayName: CPU request
   required: true
   name: FRONTEND_CPU_REQUEST
-  value: "10m"
-
+  value: 10m
 - description: CPU limit
   displayName: CPU limit
   required: true
   name: FRONTEND_CPU_LIMIT
-  value: "50m"
-
+  value: 50m
 - description: Memory request
   displayName: Memory request
   required: true
   name: FRONTEND_MEMORY_REQUEST
-  value: "8M"
-
+  value: 8M
 - description: Memory limit
   displayName: Memory limit
   required: true
   name: FRONTEND_MEMORY_LIMIT
-  value: "64M"
-
+  value: 64M
 - description: Number of deployment replicas
   displayName: Number of deployment replicas
   required: true
   name: FRONTEND_REPLICAS
-  value: "1"
-
+  value: '1'
 - name: CONTROLLER_IMAGE
   value: fabric8/configmapcontroller
   required: true
@@ -249,6 +246,17 @@ parameters:
 - name: LAUNCHER_MISSIONCONTROL_OPENSHIFT_TOKEN
   displayName: OpenShift token
   description: OpenShift token (leave empty when using Keycloak with OpenShift as an Identity Provider or user/password above)
+  value:
+- name: LAUNCHER_OAUTH_OPENSHIFT_CLIENT_ID
+  displayName: OpenShift Client ID
+  description:  The OpenShift Oauth Client ID to use for cluster authentication
+  value: launcher
+- name: LAUNCHER_OAUTH_GITHUB_CLIENT_ID
+  displayName: GitHub Oauth Client ID
+  description: The GitHub Oauth Client ID to use for GitHub authentication
+- name: LAUNCHER_OAUTH_GITHUB_SECRET
+  displayName: GitHub Oauth Secret
+  description: The GitHub Oauth Secret to use for GitHub authentication
   value:
 objects:
 - kind: ConfigMap
@@ -276,19 +284,17 @@ objects:
     launcher.keycloak.url: ${LAUNCHER_KEYCLOAK_URL}
     launcher.keycloak.realm: ${LAUNCHER_KEYCLOAK_REALM}
     launcher.keycloak.client.id: ${LAUNCHER_KEYCLOAK_CLIENT_ID}
+    launcher.oauth.openshift.url: ${LAUNCHER_OAUTH_OPENSHIFT_URL}
     launcher.tracker.segment.token: ${LAUNCHER_TRACKER_SEGMENT_TOKEN}
     launcher.backend.url: /launch/api
+    launcher.filter.runtime: ${LAUNCHER_FILTER_RUNTIME}
+    launcher.filter.version: ${LAUNCHER_FILTER_VERSION}
     launcher.frontend.sentry.dsn:
     launcher.frontend.targetenvironment.skip:
     launcher.backend.sentry.dsn:
     launcher.creator.enabled:
     launcher.creator.sentry.dsn:
     launcher.creator.url: /launch/creator
-    osio.keycloak.saas.url: https://api.prod-preview.openshift.io
-    osio.openshift.api.url: https://osoproxy.prod-preview.openshift.io
-    osio.wit.url: https://api.prod-preview.openshift.io
-    osio.auth.url: https://auth.prod-preview.openshift.io
-    osio.jenkins.url: https://jenkins.prod-preview.openshift.io
 - kind: ConfigMap
   apiVersion: v1
   metadata:
@@ -330,14 +336,20 @@ objects:
         apiUrl: https://api.pro-ap-southeast-2.openshift.com
         consoleUrl: https://console.pro-ap-southeast-2.openshift.com
         type: pro
+    git-providers.yaml: |-
+      - id: GitHub
+        name: "GitHub"
+        apiUrl: https://api.github.com
+        repositoryUrl: https://github.com
+        type: GITHUB
 - kind: DeploymentConfig
   apiVersion: v1
   metadata:
     name: launcher-backend
     annotations:
-      configmap.fabric8.io/update-on-change: "launcher,launcher-clusters"
+      configmap.fabric8.io/update-on-change: launcher,launcher-clusters
   spec:
-    replicas: "${{BACKEND_REPLICAS}}"
+    replicas: ${{BACKEND_REPLICAS}}
     selector:
       service: launcher-backend
     strategy:
@@ -484,39 +496,25 @@ objects:
                 key: launcher.backend.environment
           - name: LAUNCHER_MISSIONCONTROL_OPENSHIFT_CLUSTERS_FILE
             value: /etc/fabric8-launcher/openshift-clusters.yaml
+          - name: LAUNCHER_GIT_PROVIDERS_FILE
+            value: /etc/fabric8-launcher/git-providers.yaml
           - name: LAUNCHER_MISSIONCONTROL_OPENSHIFT_CLUSTERS_SUBSCRIPTION_TOKEN
             valueFrom:
               secretKeyRef:
                 name: launcher
                 key: launcher.missioncontrol.openshift.clusters.subscription.token
                 optional: true
-          - name: KEYCLOAK_SAAS_URL
+          - name: LAUNCHER_FILTER_RUNTIME
             valueFrom:
               configMapKeyRef:
                 name: launcher
-                key: osio.keycloak.saas.url
-          - name: OPENSHIFT_API_URL
-            valueFrom:
-              configMapKeyRef:
-                name: launcher
-                key: osio.openshift.api.url
-          - name: WIT_URL
-            valueFrom:
-              configMapKeyRef:
-                name: launcher
-                key: osio.wit.url
+                key: launcher.filter.runtime
                 optional: true
-          - name: AUTH_URL
+          - name: LAUNCHER_FILTER_VERSION
             valueFrom:
               configMapKeyRef:
                 name: launcher
-                key: osio.auth.url
-                optional: true
-          - name: JENKINS_URL
-            valueFrom:
-              configMapKeyRef:
-                name: launcher
-                key: osio.jenkins.url
+                key: launcher.filter.version
                 optional: true
           image: ${BACKEND_IMAGE}:${BACKEND_IMAGE_TAG}
           imagePullPolicy: Always
@@ -570,7 +568,7 @@ objects:
     name: launcher-backend
   spec:
     ports:
-    - name: "8080"
+    - name: '8080'
       port: 8080
       protocol: TCP
       targetPort: 8080
@@ -616,6 +614,18 @@ objects:
             value: ${WELCOME_IMAGE_NAME}
           - name: WELCOME_IMAGE_TAG
             value: ${WELCOME_IMAGE_TAG}
+          - name: LAUNCHER_FILTER_RUNTIME
+            valueFrom:
+              configMapKeyRef:
+                name: launcher
+                key: launcher.filter.runtime
+                optional: true
+          - name: LAUNCHER_FILTER_VERSION
+            valueFrom:
+              configMapKeyRef:
+                name: launcher
+                key: launcher.filter.version
+                optional: true
           - name: SENTRY_DSN
             valueFrom:
               configMapKeyRef:
@@ -673,9 +683,9 @@ objects:
   metadata:
     name: launcher-frontend
     annotations:
-      configmap.fabric8.io/update-on-change: "launcher"
+      configmap.fabric8.io/update-on-change: launcher
   spec:
-    replicas: "${{FRONTEND_REPLICAS}}"
+    replicas: ${{FRONTEND_REPLICAS}}
     selector:
       service: launcher-frontend
     strategy:
@@ -712,12 +722,6 @@ objects:
                 name: launcher
                 key: launcher.creator.url
                 optional: true
-          - name: LAUNCHER_CREATOR_ENABLED
-            valueFrom:
-              configMapKeyRef:
-                name: launcher
-                key: launcher.creator.enabled
-                optional: true
           - name: LAUNCHER_KEYCLOAK_URL
             valueFrom:
               configMapKeyRef:
@@ -733,6 +737,30 @@ objects:
               configMapKeyRef:
                 name: launcher
                 key: launcher.keycloak.client.id
+                optional: true
+          - name: LAUNCHER_OAUTH_OPENSHIFT_URL
+            valueFrom:
+              configMapKeyRef:
+                name: launcher
+                key: launcher.oauth.openshift.url
+                optional: true
+          - name: LAUNCHER_OAUTH_OPENSHIFT_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: launcher-oauth-openshift
+                key: clientId
+                optional: true
+          - name: LAUNCHER_OAUTH_GITHUB_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: launcher-oauth-github
+                key: clientId
+                optional: true
+          - name: LAUNCHER_OAUTH_GITHUB_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: launcher-oauth-github
+                key: secret
                 optional: true
           - name: LAUNCHER_TRACKER_SEGMENT_TOKEN
             valueFrom:
@@ -755,14 +783,14 @@ objects:
           terminationMessagePath: /dev/termination-log
           readinessProbe:
             httpGet:
-              path: /launch/wizard
+              path: /launch
               port: 8080
             initialDelaySeconds: 15
             timeoutSeconds: 10
             periodSeconds: 20
           livenessProbe:
             httpGet:
-              path: /launch/wizard
+              path: /launch
               port: 8080
             initialDelaySeconds: 30
             timeoutSeconds: 10
@@ -789,7 +817,7 @@ objects:
     name: launcher-frontend
   spec:
     ports:
-    - name: "8080"
+    - name: '8080'
       port: 8080
       protocol: TCP
       targetPort: 8080
@@ -797,7 +825,6 @@ objects:
       service: launcher-frontend
     sessionAffinity: None
     type: ClusterIP
-
 - apiVersion: v1
   kind: ServiceAccount
   metadata:
@@ -866,4 +893,16 @@ objects:
   stringData:
     launcher.missioncontrol.openshift.clusters.subscription.token:
     launcher.missioncontrol.openshift.token: ${LAUNCHER_MISSIONCONTROL_OPENSHIFT_TOKEN}
-
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: launcher-oauth-openshift
+  stringData:
+    clientId: ${LAUNCHER_OAUTH_OPENSHIFT_CLIENT_ID}
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: launcher-oauth-github
+  stringData:
+    clientId: ${LAUNCHER_OAUTH_GITHUB_CLIENT_ID}
+    secret: ${LAUNCHER_OAUTH_GITHUB_SECRET}
