@@ -68,7 +68,7 @@ kind: OAuthClient
 apiVersion: oauth.openshift.io/v1
 metadata:
   name: launcher
-secret: <CHANGE_IT>
+secret: launcher-oauth-github
 redirectURIs:
   - "$(oc get route launcher --template={{.spec.host}})"
 grantMethod: prompt
