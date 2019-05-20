@@ -11,6 +11,10 @@ The user needs cluster-admin permissions to install the Launcher operator
 $ oc adm policy --as system:admin add-cluster-role-to-user cluster-admin <user>
 ```
 
+## Create a namespace / project where to create the launcher
+
+
+
 ## Install the Launcher operator
 
 Login with the OpenShift client using a user with cluster-admin permissions.
@@ -24,7 +28,13 @@ $ git clone https://github.com/fabric8-launcher/launcher-operator
 $ cd launcher-operator
 ```
 
-Choose the project that will run the operator and then install all the operator resources:
+Choose the project that will run the operator and then install all the operator resources, or create a new project:
+
+```bash
+$ oc new-project launcher-infra
+```
+
+Install the Launcher operator
 
 ```bash
 $ oc create -R -f ./deploy 
@@ -53,19 +63,19 @@ $ oc get route launcher --template={{.spec.host}}
 
 5. Create a OAuth client in OpenShift:
 ```bash
-$ oc create -f <(echo '
-  kind: OAuthClient
-  apiVersion: oauth.openshift.io/v1
-  metadata:
-    name: launcher
-  secret: launcher-oauth-github
-  redirectURIs:
-    - "http://<your frontend hostname>/"
-  grantMethod: prompt
-  ')
+$ cat <<EOF | oc create -f -
+kind: OAuthClient
+apiVersion: oauth.openshift.io/v1
+metadata:
+  name: launcher
+secret: my-secret-password
+redirectURIs:
+  - "$(oc get route launcher --template={{.spec.host}})"
+grantMethod: prompt
+EOF
 ```
 
-6. Edit you GitHub OAuth application with the frontend URL as 'Homepage URL' an 'Authorization callback URL'
+6. Edit you GitHub OAuth application, created in step 1, and set both the 'Homepage URL' and 'Authorization callback URL' to the launcher frontend URL, retrieved in step 4. 
 
 ## Example Launcher CR
 
