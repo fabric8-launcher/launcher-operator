@@ -58,7 +58,7 @@ $ oc create -f <(echo '
   apiVersion: oauth.openshift.io/v1
   metadata:
     name: launcher
-  secret: <CHANGE_IT>
+  secret: launcher-oauth-github
   redirectURIs:
     - "http://<your frontend hostname>/"
   grantMethod: prompt
