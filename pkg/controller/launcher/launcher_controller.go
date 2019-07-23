@@ -2,18 +2,19 @@ package launcher
 
 import (
 	"context"
-	launcherApi "fabric8-launcher/launcher-operator/pkg/apis/launcher/v1alpha2"
-	"fabric8-launcher/launcher-operator/pkg/helper"
 	"fmt"
 	"os"
 	"reflect"
+
+	launcherApi "github.com/fabric8-launcher/launcher-operator/pkg/apis/launcher/v1alpha2"
+	"github.com/fabric8-launcher/launcher-operator/pkg/helper"
 
 	"github.com/integr8ly/operator-sdk-openshift-utils/pkg/api/template"
 	appsv1 "github.com/openshift/api/apps/v1"
 	appsv1client "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"

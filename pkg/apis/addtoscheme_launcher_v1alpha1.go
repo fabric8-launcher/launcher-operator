@@ -1,7 +1,7 @@
 package apis
 
 import (
-	"fabric8-launcher/launcher-operator/pkg/apis/launcher/v1alpha2"
+	"github.com/fabric8-launcher/launcher-operator/pkg/apis/launcher/v1alpha2"
 
 	"github.com/integr8ly/operator-sdk-openshift-utils/pkg/api/schemes"
 )
