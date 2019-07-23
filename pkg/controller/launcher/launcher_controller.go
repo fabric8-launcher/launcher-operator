@@ -167,7 +167,7 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	if isUpdated {
 		log.Info("The config has been updated, a new deployment should be triggered")
-		for _, deploymentConfigName := range []string{"launcher-backend", "launcher-creator-backend", "launcher-frontend"} {
+		for _, deploymentConfigName := range []string{"launcher-application"} {
 			err = r.deployLatest(instance.Namespace, deploymentConfigName)
 			if err != nil {
 				return reconcile.Result{}, err
