@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
-	"fabric8-launcher/launcher-operator/pkg/apis"
-	"fabric8-launcher/launcher-operator/pkg/controller"
 	"flag"
 	"fmt"
 	"os"
 	"runtime"
+
+	"github.com/fabric8-launcher/launcher-operator/pkg/apis"
+	"github.com/fabric8-launcher/launcher-operator/pkg/controller"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/operator-framework/operator-sdk/pkg/leader"

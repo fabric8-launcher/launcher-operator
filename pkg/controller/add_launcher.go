@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"fabric8-launcher/launcher-operator/pkg/controller/launcher"
+	"github.com/fabric8-launcher/launcher-operator/pkg/controller/launcher"
 )
 
 func init() {
