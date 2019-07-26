@@ -95,19 +95,6 @@ parameters:
     in the booster catalog entries. Leaving this empty will set the value to 'development' if the
     'Catalog Git Reference' is set to 'master', in any other case the value will default to 'production'.
   value:
-- name: LAUNCHER_BACKEND_ARTEMIS_URL
-  displayName: ActiveMQ Artemis JMS URL
-  description: ActiveMQ Artemis URL to store your status messages (needed when using multiple backend replicas). 
-    Leave it blank if you are not planning on using more than one replica for the backend.
-  value:
-- name: LAUNCHER_BACKEND_ARTEMIS_USERNAME
-  displayName: ActiveMQ Artemis JMS Username
-  description: ActiveMQ Artemis Username for the ActiveMQ Artemis URL. Leave it blank if ActiveMQ Artemis URL is unset.
-  value:
-- name: LAUNCHER_BACKEND_ARTEMIS_PASSWORD
-  displayName: ActiveMQ Artemis JMS Password
-  description: ActiveMQ Artemis Password for the ActiveMQ Artemis URL. Leave it blank if ActiveMQ Artemis URL is unset.
-  value:
 - name: LAUNCHER_BACKEND_GIT_REPOSITORY_DESCRIPTION
   displayName: Git Repository Description
   description: The Git repository description to be used by Launcher
@@ -174,14 +161,6 @@ parameters:
   displayName: OpenShift Client ID
   description:  The OpenShift Oauth Client ID to use for cluster authentication
   value: launcher
-- name: LAUNCHER_OAUTH_GITHUB_CLIENT_ID
-  displayName: GitHub Oauth Client ID
-  description: The GitHub Oauth Client ID to use for GitHub authentication
-  value:
-- name: LAUNCHER_OAUTH_GITHUB_SECRET
-  displayName: GitHub Oauth Secret
-  description: The GitHub Oauth Secret to use for GitHub authentication
-  value:
 objects:
 - kind: ConfigMap
   apiVersion: v1
@@ -194,9 +173,6 @@ objects:
     launcher.missioncontrol.openshift.impersonate.user: ${LAUNCHER_MISSIONCONTROL_OPENSHIFT_IMPERSONATE_USER}
     launcher.missioncontrol.openshift.api.url: ${LAUNCHER_MISSIONCONTROL_OPENSHIFT_API_URL}
     launcher.missioncontrol.openshift.console.url: ${LAUNCHER_MISSIONCONTROL_OPENSHIFT_CONSOLE_URL}
-    launcher.backend.artemis.url: ${LAUNCHER_BACKEND_ARTEMIS_URL}
-    launcher.backend.artemis.username: ${LAUNCHER_BACKEND_ARTEMIS_USERNAME}
-    launcher.backend.artemis.password: ${LAUNCHER_BACKEND_ARTEMIS_PASSWORD}
     launcher.backend.catalog.filter: ${LAUNCHER_BOOSTER_CATALOG_FILTER}
     launcher.backend.catalog.git.repository: ${LAUNCHER_BOOSTER_CATALOG_REPOSITORY}
     launcher.backend.catalog.git.ref: ${LAUNCHER_BOOSTER_CATALOG_REF}
@@ -294,24 +270,6 @@ objects:
       spec:
         containers:
         - env:
-          - name: ARTEMIS_URL
-            valueFrom:
-              configMapKeyRef:
-                name: launcher
-                key: launcher.backend.artemis.url
-                optional: true
-          - name: ARTEMIS_USERNAME
-            valueFrom:
-              configMapKeyRef:
-                name: launcher
-                key: launcher.backend.artemis.username
-                optional: true
-          - name: ARTEMIS_PASSWORD
-            valueFrom:
-              configMapKeyRef:
-                name: launcher
-                key: launcher.backend.artemis.password
-                optional: true
           - name: LAUNCHER_BOOSTER_CATALOG_REPOSITORY
             valueFrom:
               configMapKeyRef:
@@ -478,18 +436,6 @@ objects:
                 name: launcher-oauth-openshift
                 key: clientId
                 optional: true
-          - name: LAUNCHER_OAUTH_GITHUB_CLIENT_ID
-            valueFrom:
-              secretKeyRef:
-                name: launcher-oauth-github
-                key: clientId
-                optional: true
-          - name: LAUNCHER_OAUTH_GITHUB_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: launcher-oauth-github
-                key: secret
-                optional: true
           - name: LAUNCHER_FRONTEND_SENTRY_DSN
             valueFrom:
               configMapKeyRef:
@@ -574,11 +520,14 @@ objects:
       service: launcher-application
     sessionAffinity: None
     type: ClusterIP
-- apiVersion: v1
+- apiVersion: route.openshift.io/v1
   kind: Route
   metadata:
     name: launcher
   spec:
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
     to:
       kind: Service
       name: launcher-application
@@ -599,10 +548,3 @@ objects:
     name: launcher-oauth-openshift
   stringData:
     clientId: ${LAUNCHER_OAUTH_OPENSHIFT_CLIENT_ID}
-- apiVersion: v1
-  kind: Secret
-  metadata:
-    name: launcher-oauth-github
-  stringData:
-    clientId: ${LAUNCHER_OAUTH_GITHUB_CLIENT_ID}
-    secret: ${LAUNCHER_OAUTH_GITHUB_SECRET}
