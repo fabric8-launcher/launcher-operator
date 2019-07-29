@@ -75,6 +75,5 @@ spec:
   segment:
     token: token
   sentry:
-    creatorToken: value or valueFrom/secretKeyRef
     backendToken: value or valueFrom/secretKeyRef
     frontendToken: value or valueFrom/secretKeyRef
