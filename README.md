@@ -70,7 +70,7 @@ metadata:
   name: launcher
 secret: my-secret-password
 redirectURIs:
-  - "http://$(oc get route launcher --template={{.spec.host}})"
+  - "https://$(oc get route launcher --template={{.spec.host}})"
 grantMethod: prompt
 EOF
 ```
