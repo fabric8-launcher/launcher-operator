@@ -68,10 +68,6 @@ spec:
         secretKeyRef:
           name: github-test-secret
           key: token
-  jms:
-    url: optional jms connection url
-    username: jms connection username
-    password: jms connection password or valueFrom/secretKeyRef
   keycloak:
     url: https://sso.openshift.io/auth
     realm: rh-developers-launch
