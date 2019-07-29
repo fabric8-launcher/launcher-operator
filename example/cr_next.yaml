@@ -9,7 +9,6 @@ spec:
     repositoryRef: master
     filter: filter expression
     reindexToken: token
-  creator: false
   openshift:
     apiUrl: apiUrl (default is the same cluster as the operator is installed)
     consoleUrl: consoleUrl
