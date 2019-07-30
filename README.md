@@ -3,7 +3,7 @@
 This operator helps enabling the Launcher on an Openshift cluster.
 
 
-## Give cluster admin permissions to the user <user>:
+## Give cluster admin permissions to the user \<user>
 
 The user needs cluster-admin permissions to install the Launcher operator
 
@@ -12,7 +12,6 @@ $ oc adm policy --as system:admin add-cluster-role-to-user cluster-admin <user>
 ```
 
 ## Create a namespace / project where to create the launcher
-
 
 
 ## Install the Launcher operator
@@ -37,7 +36,7 @@ $ oc new-project launcher-infra
 Install the Launcher operator
 
 ```bash
-$ oc create -R -f ./deploy 
+$ oc create -R -f ./deploy
 ```
 
 ## Install the Launcher (via the installed operator)
@@ -51,7 +50,7 @@ $ oc create -R -f ./deploy
 $ oc create secret generic launcher-oauth-github --from-literal=clientId=<YOUR_GITHUB_OAUTH_APP_CLIENT_ID> --from-literal=secret=<YOUR_GITHUB_OAUTH_APP_CLIENT_SECRET>
 ```
 
-3. Customize the Launcher Resource with you OpenShift Console URL and create it
+3. Customize the Launcher Resource with your OpenShift Console URL and create it
 ```bash
 $ oc create -f example/launcher_cr.yaml
 ```
@@ -75,7 +74,7 @@ grantMethod: prompt
 EOF
 ```
 
-6. Edit you GitHub OAuth application, created in step 1, and set both the 'Homepage URL' and 'Authorization callback URL' to the launcher frontend URL, retrieved in step 4. 
+6. Edit you GitHub OAuth application, created in step 1, and set both the 'Homepage URL' and 'Authorization callback URL' to the launcher frontend URL, retrieved in step 4.
 
 ## Example Launcher CR
 
@@ -99,7 +98,7 @@ $ dep ensure -v
 
 Start the operator (just restart this command to apply your changes):
 ```bash 
-operator-sdk up local --namespace myproject   
+operator-sdk up local --namespace myproject
 ```
 
 Run this command when changing the API types (pkg/apis/launcher/v1alpha2/launcher_types.go)
@@ -107,7 +106,7 @@ Run this command when changing the API types (pkg/apis/launcher/v1alpha2/launche
 operator-sdk generate k8s
 ```
 
-Then create your launcher CR and watch the logs in the console ouput.
+Then create your launcher CR and watch the logs in the console output.
 
 
 ### Update the launcher template to the latest version from GitHub
