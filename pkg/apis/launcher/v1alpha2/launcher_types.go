@@ -14,6 +14,8 @@ type LauncherSpec struct {
 	GitHub    GitHubConfig    `json:"github"`
 	OpenShift OpenShiftConfig `json:"openshift,omitempty"`
 	OAuth     OAuthConfig     `json:"oauth,omitempty"`
+	Catalog   CatalogConfig   `json:"catalog,omitempty"`
+	Filter    FilterConfig    `json:"filter,omitempty"`
 }
 
 // OAuthConfig defines the OAuth configuration
@@ -29,6 +31,20 @@ type OpenShiftConfig struct {
 // GitHubConfig defines the Git configuration
 type GitHubConfig struct {
 	Token SensitiveValue `json:"token,omitempty"`
+}
+
+// FilterConfig defines the filter configuration
+type FilterConfig struct {
+	Runtime string `json:"runtime,omitempty"`
+	Version string `json:"version,omitempty"`
+}
+
+// CatalogConfig defines the Catalog configuration
+type CatalogConfig struct {
+	RepositoryURL string `json:"repositoryUrl,omitempty"`
+	RepositoryRef string `json:"repositoryRef,omitempty"`
+	Filter        string `json:"filter,omitempty"`
+	ReindexToken  string `json:"reindexToken,omitempty"`
 }
 
 // SensitiveValue defines a sensitive value
