@@ -150,9 +150,9 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 		}
 		gitProviders := []GitProvider{}
 		err := yaml.Unmarshal([]byte(gitProvidersData), &gitProviders)
-			index := findByID(gitProviders, gitConfig.ID)
-				gitProviders[index].ClientProperties.ClientID = gitConfig.ClientID
-				gitProviders[index].ServerProperties.ClientSecret = gitConfig.ClientSecret
+		index := findByID(gitProviders, gitConfig.ID)
+		gitProviders[index].ClientProperties.ClientID = gitConfig.ClientID
+		gitProviders[index].ServerProperties.ClientSecret = gitConfig.ClientSecret
 		d, err := yaml.Marshal(&gitProviders)
 		if err == nil {
 			clusterConfig.Data["git-providers.yaml"] = string(d)
@@ -318,9 +318,6 @@ func (r *ReconcileLauncher) createLauncherResource(cr *launcherApi.Launcher, res
 		log.Info("Resource is missing. Creating it.",
 			"name", resource.(v1.Object).GetName(),
 			"kind", resource.GetObjectKind().GroupVersionKind().Kind)
-		if resource.GetObjectKind().GroupVersionKind().Kind == "ConfigMap" {
-			fmt.Println("value: %n", resource)
-		}
 		err = r.client.Create(context.TODO(), resource)
 		if err != nil {
 			return fmt.Errorf("error creating resource: %s", err)
