@@ -6,7 +6,7 @@ spec:
 
 ####### OpenShift Configuration
   openshift:
-    consoleUrl: https://192.168.42.39:8443/console
+    consoleUrl: #<the OpenShift Console Url (ex: 'https://192.168.64.4:8443')>#
 
 ####### OAuth Configuration
   oauth:
