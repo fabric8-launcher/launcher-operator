@@ -11,3 +11,8 @@ spec:
 ####### OAuth Configuration
   oauth:
     enabled: true
+
+  git:
+    - id: GitHub
+      clientId: "12"
+      clientSecret: "12"

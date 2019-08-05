@@ -148,6 +148,15 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 		if &instance.Spec.OpenShift == nil || instance.Spec.OpenShift.ConsoleURL == "" {
 			return reconcile.Result{}, fmt.Errorf("OpenShift ConsoleUrl must be defined to use OAuth")
 		}
+		gitProviders := []GitProvider{}
+		err := yaml.Unmarshal([]byte(gitProvidersData), &gitProviders)
+		index := findByID(gitProviders, gitConfig.ID)
+		gitProviders[index].ClientProperties.ClientID = gitConfig.ClientID
+		gitProviders[index].ServerProperties.ClientSecret = gitConfig.ClientSecret
+		d, err := yaml.Marshal(&gitProviders)
+		if err == nil {
+			clusterConfig.Data["git-providers.yaml"] = string(d)
+		}
 		data["launcher.oauth.openshift.url"] = instance.Spec.OpenShift.ConsoleURL + "/oauth/authorize"
 	} else if &instance.Spec.GitHub.Token != nil {
 		token, err := r.getSensitiveValue(instance.Namespace, instance.Spec.GitHub.Token)
