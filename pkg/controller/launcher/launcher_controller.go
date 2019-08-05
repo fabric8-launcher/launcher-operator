@@ -159,6 +159,22 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 		data["launcher.missioncontrol.github.token"] = token
 	}
 
+	if &instance.Spec.Catalog != nil {
+		if instance.Spec.Catalog.RepositoryURL != "" {
+			data["launcher.backend.catalog.git.repository"] = instance.Spec.Catalog.RepositoryURL
+		}
+		if instance.Spec.Catalog.RepositoryRef != "" {
+			data["launcher.backend.catalog.git.ref"] = instance.Spec.Catalog.RepositoryRef
+		}
+		data["launcher.backend.catalog.filter"] = instance.Spec.Catalog.Filter
+		data["launcher.backend.catalog.reindex.token"] = instance.Spec.Catalog.ReindexToken
+	}
+
+	if &instance.Spec.Filter != nil {
+		data["launcher.filter.runtime"] = instance.Spec.Filter.Runtime
+		data["launcher.filter.version"] = instance.Spec.Filter.Version
+	}
+
 	isUpdated, err := r.updateConfigIfChanged(instance, configMap)
 
 	if err != nil {
