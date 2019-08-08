@@ -20,7 +20,9 @@ type LauncherSpec struct {
 
 // OAuthConfig defines the OAuth configuration
 type OAuthConfig struct {
-	Enabled bool `json:"enabled"`
+	Enabled       bool   `json:"enabled"`
+	KeycloakURL   string `json:"keycloakUrl,omitempty"`
+	KeycloakRealm string `json:"keycloakRealm,omitempty"`
 }
 
 // OpenShiftConfig defines the OpenShift configuration
