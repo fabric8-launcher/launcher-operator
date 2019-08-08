@@ -11,7 +11,7 @@ import (
 type LauncherSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	GitHub    GitHubConfig    `json:"github"`
+	Git       GitConfig       `json:"git"`
 	OpenShift OpenShiftConfig `json:"openshift,omitempty"`
 	OAuth     OAuthConfig     `json:"oauth,omitempty"`
 	Catalog   CatalogConfig   `json:"catalog,omitempty"`
@@ -28,9 +28,18 @@ type OpenShiftConfig struct {
 	ConsoleURL string `json:"consoleUrl,omitempty"`
 }
 
-// GitHubConfig defines the Git configuration
-type GitHubConfig struct {
-	Token SensitiveValue `json:"token,omitempty"`
+// GitConfig defines the Git configuration
+type GitConfig struct {
+	Token        SensitiveValue      `json:"token,omitempty"`
+	GitProviders []GitProviderConfig `json:"providers,omitempty"`
+}
+
+// GitProviderConfig defines the Git configuration
+type GitProviderConfig struct {
+	ID           string `json:"id,omitempty"`
+	ClientID     string `json:"clientId,omitempty"`
+	ClientSecret string `json:"clientSecret,omitempty"`
+	OauthURL     string `json:"oauthUrl,omitempty"`
 }
 
 // FilterConfig defines the filter configuration

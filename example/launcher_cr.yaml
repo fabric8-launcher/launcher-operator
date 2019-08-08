@@ -13,6 +13,7 @@ spec:
     enabled: true
 
   git:
+    providers:
     - id: GitHub
       clientId: "12"
       clientSecret: "12"

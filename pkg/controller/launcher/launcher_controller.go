@@ -12,6 +12,7 @@ import (
 	"github.com/integr8ly/operator-sdk-openshift-utils/pkg/api/template"
 	appsv1 "github.com/openshift/api/apps/v1"
 	appsv1client "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
+	"gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,6 +32,22 @@ import (
 var log = logf.Log.WithName("controller_launcher")
 
 var templateName = "fabric8-launcher"
+
+// GitProvider config
+type GitProvider struct {
+	ID               string
+	Name             string
+	APIURL           string `yaml:"apiUrl"`
+	RepositoryURL    string `yaml:"repositoryUrl"`
+	Type             string `yaml:"type"`
+	ClientProperties struct {
+		ClientID string `yaml:"clientId"`
+	} `yaml:"clientProperties"`
+	ServerProperties struct {
+		ClientSecret string `yaml:"clientSecret"`
+		OauthURL     string `yaml:"oauthUrl"`
+	} `yaml:"serverProperties"`
+}
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
@@ -148,18 +165,30 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 		if &instance.Spec.OpenShift == nil || instance.Spec.OpenShift.ConsoleURL == "" {
 			return reconcile.Result{}, fmt.Errorf("OpenShift ConsoleUrl must be defined to use OAuth")
 		}
+		clusterConfig := r.findObjectByKindAndName(resourceObjects, "launcher-clusters", "ConfigMap").(*corev1.ConfigMap)
+		gitProvidersData := clusterConfig.Data["git-providers.yaml"]
 		gitProviders := []GitProvider{}
 		err := yaml.Unmarshal([]byte(gitProvidersData), &gitProviders)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		for _, gitConfig := range instance.Spec.Git.GitProviders {
 		index := findByID(gitProviders, gitConfig.ID)
+			if index == -1 {
+				return reconcile.Result{}, fmt.Errorf("could not find git provider config with ID: '%s'", gitConfig.ID)
+			}
 		gitProviders[index].ClientProperties.ClientID = gitConfig.ClientID
 		gitProviders[index].ServerProperties.ClientSecret = gitConfig.ClientSecret
+			gitProviders[index].ServerProperties.OauthURL = gitConfig.OauthURL
+		}
 		d, err := yaml.Marshal(&gitProviders)
 		if err == nil {
 			clusterConfig.Data["git-providers.yaml"] = string(d)
 		}
 		data["launcher.oauth.openshift.url"] = instance.Spec.OpenShift.ConsoleURL + "/oauth/authorize"
-	} else if &instance.Spec.GitHub.Token != nil {
-		token, err := r.getSensitiveValue(instance.Namespace, instance.Spec.GitHub.Token)
+	} else if &instance.Spec.Git.Token != nil {
+		token, err := r.getSensitiveValue(instance.Namespace, instance.Spec.Git.Token)
 
 		if err != nil {
 			return reconcile.Result{}, err
@@ -208,6 +237,15 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	}
 	return reconcile.Result{}, nil
+}
+
+func findByID(gitProviders []GitProvider, id string) int {
+	for index, provider := range gitProviders {
+		if provider.ID == id {
+			return index
+		}
+	}
+	return -1
 }
 
 func (r *ReconcileLauncher) filterResourcesObjects(obj *runtime.Object) error {
