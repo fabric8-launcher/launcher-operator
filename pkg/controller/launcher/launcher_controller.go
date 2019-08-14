@@ -172,12 +172,12 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 		}
 
 		for _, gitConfig := range instance.Spec.Git.GitProviders {
-		index := findByID(gitProviders, gitConfig.ID)
+			index := findByID(gitProviders, gitConfig.ID)
 			if index == -1 {
 				return reconcile.Result{}, fmt.Errorf("could not find git provider config with ID: '%s'", gitConfig.ID)
 			}
-		gitProviders[index].ClientProperties.ClientID = gitConfig.ClientID
-		gitProviders[index].ServerProperties.ClientSecret = gitConfig.ClientSecret
+			gitProviders[index].ClientProperties.ClientID = gitConfig.ClientID
+			gitProviders[index].ServerProperties.ClientSecret = gitConfig.ClientSecret
 			gitProviders[index].ServerProperties.OauthURL = gitConfig.OauthURL
 		}
 		d, err := yaml.Marshal(&gitProviders)
@@ -187,6 +187,7 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 		if instance.Spec.OAuth.KeycloakURL != "" {
 			data["launcher.keycloak.url"] = instance.Spec.OAuth.KeycloakURL
 			data["launcher.keycloak.realm"] = instance.Spec.OAuth.KeycloakRealm
+			data["launcher.keycloak.client.id"] = instance.Spec.OAuth.KeycloakClientID
 		} else {
 			data["launcher.oauth.openshift.url"] = instance.Spec.OpenShift.ConsoleURL + "/oauth/authorize"
 		}

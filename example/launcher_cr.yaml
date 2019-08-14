@@ -13,6 +13,7 @@ spec:
     enabled: true
     keycloakUrl: http://keycloakUrl
     keycloakRealm: launcher
+    keycloakClientId: launcher
 
   git:
     providers:
