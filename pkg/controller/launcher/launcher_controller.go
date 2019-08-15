@@ -49,6 +49,14 @@ type GitProvider struct {
 	} `yaml:"serverProperties"`
 }
 
+type OpenShiftCluster struct {
+	ID         string `yaml:"id"`
+	Name       string `yaml:"name"`
+	ApiURL     string `yaml:"apiUrl"`
+	ConsoleURL string `yaml:"consoleUrl"`
+	Type       string `yaml:"type"`
+}
+
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
 * business logic.  Delete these comments after modifying this file.*
@@ -151,19 +159,42 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, fmt.Errorf("ConfigMap not found in the launcher template")
 	}
 
-	url := r.config.Host
 	data := configMap.Data
 	data["launcher.frontend.targetenvironment.skip"] = "true"
-	data["launcher.missioncontrol.openshift.api.url"] = url
+	
 	if &instance.Spec.OpenShift != nil && instance.Spec.OpenShift.ConsoleURL != "" {
 		data["launcher.missioncontrol.openshift.console.url"] = instance.Spec.OpenShift.ConsoleURL
+	}
+
+	data["launcher.missioncontrol.openshift.api.url"] = ""
+	if &instance.Spec.OpenShift != nil && instance.Spec.OpenShift.ApiURL != "" {
+		data["launcher.missioncontrol.openshift.api.url"] = instance.Spec.OpenShift.ApiURL
+	}
+
+	clusterConfig := r.findObjectByKindAndName(resourceObjects, "launcher-clusters", "ConfigMap").(*corev1.ConfigMap)
+	if &instance.Spec.OpenShift != nil && &instance.Spec.OpenShift.Clusters != nil && len(instance.Spec.OpenShift.Clusters) > 0 {
+		openshiftClusters := []OpenShiftCluster{}
+
+		for _, cluster := range instance.Spec.OpenShift.Clusters {
+			openshiftClusters = append(openshiftClusters, OpenShiftCluster{
+				ID: cluster.ID,
+				Name: cluster.Name,
+				ApiURL: cluster.ApiURL,
+				ConsoleURL: cluster.ConsoleURL,
+				Type: cluster.Type,
+			})
+		}
+
+		d, err := yaml.Marshal(&openshiftClusters)
+		if err == nil {
+			clusterConfig.Data["openshift-clusters.yaml"] = string(d)
+		}
 	}
 
 	if &instance.Spec.OAuth != nil && instance.Spec.OAuth.Enabled {
 		if &instance.Spec.OpenShift == nil || instance.Spec.OpenShift.ConsoleURL == "" {
 			return reconcile.Result{}, fmt.Errorf("OpenShift ConsoleUrl must be defined to use OAuth")
 		}
-		clusterConfig := r.findObjectByKindAndName(resourceObjects, "launcher-clusters", "ConfigMap").(*corev1.ConfigMap)
 		gitProvidersData := clusterConfig.Data["git-providers.yaml"]
 		gitProviders := []GitProvider{}
 		err := yaml.Unmarshal([]byte(gitProvidersData), &gitProviders)

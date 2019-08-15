@@ -28,7 +28,18 @@ type OAuthConfig struct {
 
 // OpenShiftConfig defines the OpenShift configuration
 type OpenShiftConfig struct {
-	ConsoleURL string `json:"consoleUrl,omitempty"`
+	ApiURL     string                   `json:"apiUrl,omitempty"`
+	ConsoleURL string                   `json:"consoleUrl,omitempty"`
+	Clusters   []OpenShiftClusterConfig `json:"clusters,omitempty"`
+}
+
+// OpenShiftClusterConfig defines an OpenShift cluster configuration
+type OpenShiftClusterConfig struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	ApiURL     string `json:"apiUrl"`
+	ConsoleURL string `json:"consoleUrl"`
+	Type       string `json:"type"`
 }
 
 // GitConfig defines the Git configuration
