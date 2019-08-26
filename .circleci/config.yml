@@ -11,12 +11,12 @@ jobs:
       - run:
          name: Install operator-framework
          command: |
-            mkdir -p $GOPATH/src/github.com/operator-framework
-            cd $GOPATH/src/github.com/operator-framework
-            git clone https://github.com/operator-framework/operator-sdk
-            cd operator-sdk
-            git checkout master
-            make dep
-            make install
+            RELEASE_VERSION=v0.10.0
+            curl -JL https://github.com/operator-framework/operator-sdk/releases/download/${RELEASE_VERSION}/operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu -o /go/bin/operator-sdk
+            chmod +x /go/bin/operator-sdk
+      - run:
+         name: Install dep
+         command: |
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - run: dep ensure -v
       - run: operator-sdk generate k8s
