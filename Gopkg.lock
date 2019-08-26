@@ -53,6 +53,14 @@
   version = "v2.8.0"
 
 [[projects]]
+  digest = "1:448bf60e9dce6d5fd9dfa8fd9eb9a23163424ff4e4f142456405781e942e3998"
+  name = "github.com/evanphx/json-patch"
+  packages = ["."]
+  pruneopts = "NT"
+  revision = "026c730a0dcc5d11f93f1cf1cc65b01247ea7b6f"
+  version = "v4.5.0"
+
+[[projects]]
   digest = "1:81466b4218bf6adddac2572a30ac733a9255919bc2f470b4827a317bd4ee1756"
   name = "github.com/ghodss/yaml"
   packages = ["."]
@@ -248,14 +256,6 @@
   revision = "60711f1a8329503b04e1c88535f419d0bb440bff"
 
 [[projects]]
-  branch = "master"
-  digest = "1:0e9bfc47ab9941ecc3344e580baca5deb4091177e84dd9773b48b38ec26b93d5"
-  name = "github.com/mattbaird/jsonpatch"
-  packages = ["."]
-  pruneopts = "NT"
-  revision = "81af80346b1a01caae0cbc27fd3c1ba5b11e189f"
-
-[[projects]]
   digest = "1:ea1db000388d88b31db7531c83016bef0d6db0d908a07794bfc36aca16fbf935"
   name = "github.com/matttproud/golang_protobuf_extensions"
   packages = ["pbutil"]
@@ -344,6 +344,14 @@
   pruneopts = "NT"
   revision = "5f041e8faa004a95c88a202771f4cc3e991971e6"
   version = "v2.0.1"
+
+[[projects]]
+  digest = "1:14715f705ff5dfe0ffd6571d7d201dd8e921030f8070321a79380d8ca4ec1a24"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "NT"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -546,6 +554,14 @@
   revision = "d345f29b0d7b54f2b7ec62b5363832790be35e40"
 
 [[projects]]
+  digest = "1:8392b5c29adedc5f85c66b48bb53b6c49dd91d8540f3cad5d43ef7277946718f"
+  name = "gomodules.xyz/jsonpatch"
+  packages = ["v2"]
+  pruneopts = "NT"
+  revision = "e8422f09d27ee2c8cfb2c7f8089eb9eeb0764849"
+  version = "v2.0.1"
+
+[[projects]]
   digest = "1:902ffa11f1d8c19c12b05cabffe69e1a16608ad03a8899ebcb9c6bde295660ae"
   name = "google.golang.org/appengine"
   packages = [
@@ -563,6 +579,15 @@
   pruneopts = "NT"
   revision = "e9657d882bb81064595ca3b56cbe2546bbabf7b1"
   version = "v1.4.0"
+
+[[projects]]
+  digest = "1:1b91ae0dc69a41d4c2ed23ea5cffb721ea63f5037ca4b81e6d6771fbb8f45129"
+  name = "gopkg.in/fsnotify.v1"
+  packages = ["."]
+  pruneopts = "NT"
+  revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
+  source = "gopkg.in/fsnotify/fsnotify.v1"
+  version = "v1.4.7"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
@@ -819,7 +844,7 @@
   revision = "0317810137be915b9cf888946c6e115c1bfac693"
 
 [[projects]]
-  digest = "1:e03ddaf9f31bccbbb8c33eabad2c85025a95ca98905649fd744e0a54c630a064"
+  digest = "1:cc7d4dda9f8c970af917d6767e64db45a9826698a0bb24fb10f564903f0634ba"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
     "pkg/cache",
@@ -833,11 +858,15 @@
     "pkg/handler",
     "pkg/internal/controller",
     "pkg/internal/controller/metrics",
+    "pkg/internal/log",
+    "pkg/internal/objectutil",
     "pkg/internal/recorder",
     "pkg/leaderelection",
+    "pkg/log",
+    "pkg/log/zap",
     "pkg/manager",
+    "pkg/manager/signals",
     "pkg/metrics",
-    "pkg/patch",
     "pkg/predicate",
     "pkg/reconcile",
     "pkg/recorder",
@@ -845,15 +874,17 @@
     "pkg/runtime/log",
     "pkg/runtime/scheme",
     "pkg/runtime/signals",
+    "pkg/scheme",
     "pkg/source",
     "pkg/source/internal",
+    "pkg/webhook",
     "pkg/webhook/admission",
-    "pkg/webhook/admission/types",
-    "pkg/webhook/types",
+    "pkg/webhook/internal/certwatcher",
+    "pkg/webhook/internal/metrics",
   ]
   pruneopts = "NT"
-  revision = "c63ebda0bf4be5f0a8abd4003e4ea546032545ba"
-  version = "v0.1.8"
+  revision = "e1159d6655b260c4812fd0792cd1344ecc96a57e"
+  version = "v0.2.0"
 
 [solve-meta]
   analyzer-name = "dep"
