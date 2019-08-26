@@ -310,7 +310,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2fa1a91b03422f4a98423b8ff73299823862289ebfc33f25d595a6647b1c812c"
+  digest = "1:f360916b1175b29fb1c20527dd272fc0a2cdcb0e5a00ca6400da6184a251a26a"
   name = "github.com/operator-framework/operator-sdk"
   packages = [
     "pkg/k8sutil",
@@ -319,7 +319,7 @@
     "version",
   ]
   pruneopts = "NT"
-  revision = "fd86f9d50d7460ca093e2eb12a3c4941a8d5cbee"
+  revision = "abac23c897b898e6fecfb2c02fe318843ae9347f"
 
 [[projects]]
   digest = "1:93b1d84c5fa6d1ea52f4114c37714cddd84d5b78f151b62bb101128dd51399bf"
