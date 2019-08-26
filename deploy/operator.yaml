@@ -15,7 +15,7 @@ spec:
       serviceAccountName: launcher-operator
       containers:
         - name: launcher-operator
-          image: fabric8/launcher-operator:v0.1.2
+          image: fabric8/launcher-operator:v0.1.3
           ports:
           - containerPort: 60000
             name: metrics
