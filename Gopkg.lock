@@ -217,7 +217,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c1feb78bae4cb3d23155c684026d318559adce6e52821fc178dfcb93670a40b6"
+  digest = "1:6a0d09a4f7e417386a1e2f2449b50d7a7dec5971373746e0de4087c530b23f46"
   name = "github.com/integr8ly/operator-sdk-openshift-utils"
   packages = [
     "pkg/api/kubernetes",
@@ -225,7 +225,7 @@
     "pkg/api/template",
   ]
   pruneopts = "NT"
-  revision = "47c5cb21bf3b4091712e08e15dfada696a4c5625"
+  revision = "a73885515a0861e418b67580d69a53cc5453cd15"
 
 [[projects]]
   digest = "1:1d39c063244ad17c4b18e8da1551163b6ffb52bd1640a49a8ec5c3b7bf4dbd5d"
