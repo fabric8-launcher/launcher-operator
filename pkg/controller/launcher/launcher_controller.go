@@ -49,6 +49,7 @@ type GitProvider struct {
 	} `yaml:"serverProperties"`
 }
 
+// OpenShiftCluster config
 type OpenShiftCluster struct {
 	ID         string `yaml:"id"`
 	Name       string `yaml:"name"`
@@ -144,7 +145,10 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	log.Info("Launcher template has been loaded")
 
-	err = r.processLauncherTemplate(tpl, instance.Namespace)
+	var params map[string]string
+	params = make(map[string]string, 1)
+	params["LAUNCHER_IMAGE_TAG"] = instance.Spec.ImageTag
+	err = r.processLauncherTemplate(params, tpl, instance.Namespace)
 
 	if err != nil {
 		return reconcile.Result{}, err
@@ -161,7 +165,7 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	data := configMap.Data
 	data["launcher.frontend.targetenvironment.skip"] = "true"
-	
+
 	if &instance.Spec.OpenShift != nil && instance.Spec.OpenShift.ConsoleURL != "" {
 		data["launcher.missioncontrol.openshift.console.url"] = instance.Spec.OpenShift.ConsoleURL
 	}
@@ -177,11 +181,11 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 
 		for _, cluster := range instance.Spec.OpenShift.Clusters {
 			openshiftClusters = append(openshiftClusters, OpenShiftCluster{
-				ID: cluster.ID,
-				Name: cluster.Name,
-				ApiURL: cluster.ApiURL,
+				ID:         cluster.ID,
+				Name:       cluster.Name,
+				ApiURL:     cluster.ApiURL,
 				ConsoleURL: cluster.ConsoleURL,
-				Type: cluster.Type,
+				Type:       cluster.Type,
 			})
 		}
 
@@ -318,8 +322,8 @@ func (r *ReconcileLauncher) loadLauncherTemplate() (*template.Tmpl, error) {
 	return templateHelper.Load(r.config, templatePath, templateName)
 }
 
-func (r *ReconcileLauncher) processLauncherTemplate(template *template.Tmpl, namespace string) error {
-	return template.Process(nil, namespace)
+func (r *ReconcileLauncher) processLauncherTemplate(params map[string]string, template *template.Tmpl, namespace string) error {
+	return template.Process(params, namespace)
 }
 
 func (r *ReconcileLauncher) findObjectByKindAndName(objects []runtime.Object, name string, kind string) runtime.Object {
