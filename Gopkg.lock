@@ -217,7 +217,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c1feb78bae4cb3d23155c684026d318559adce6e52821fc178dfcb93670a40b6"
+  digest = "1:6a0d09a4f7e417386a1e2f2449b50d7a7dec5971373746e0de4087c530b23f46"
   name = "github.com/integr8ly/operator-sdk-openshift-utils"
   packages = [
     "pkg/api/kubernetes",
@@ -225,7 +225,7 @@
     "pkg/api/template",
   ]
   pruneopts = "NT"
-  revision = "47c5cb21bf3b4091712e08e15dfada696a4c5625"
+  revision = "a73885515a0861e418b67580d69a53cc5453cd15"
 
 [[projects]]
   digest = "1:1d39c063244ad17c4b18e8da1551163b6ffb52bd1640a49a8ec5c3b7bf4dbd5d"
@@ -310,7 +310,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2fa1a91b03422f4a98423b8ff73299823862289ebfc33f25d595a6647b1c812c"
+  digest = "1:f360916b1175b29fb1c20527dd272fc0a2cdcb0e5a00ca6400da6184a251a26a"
   name = "github.com/operator-framework/operator-sdk"
   packages = [
     "pkg/k8sutil",
@@ -319,7 +319,7 @@
     "version",
   ]
   pruneopts = "NT"
-  revision = "fd86f9d50d7460ca093e2eb12a3c4941a8d5cbee"
+  revision = "abac23c897b898e6fecfb2c02fe318843ae9347f"
 
 [[projects]]
   digest = "1:93b1d84c5fa6d1ea52f4114c37714cddd84d5b78f151b62bb101128dd51399bf"
@@ -407,12 +407,12 @@
   version = "v1.0.3"
 
 [[projects]]
-  digest = "1:8e8fc2cb42cfa0a18fda0c9c4034092faa7aac773da5efdde8828eb4b96c001d"
+  digest = "1:b1eb7870c859801cf1b3d92ce7326dda6abb90e5ff4d6bcee3d0c54e8d6acfec"
   name = "github.com/stretchr/testify"
   packages = ["assert"]
   pruneopts = "NT"
-  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
-  version = "v1.3.0"
+  revision = "221dbe5ed46703ee255b1da0dec05086f5035f62"
+  version = "v1.4.0"
 
 [[projects]]
   digest = "1:22f696cee54865fb8e9ff91df7b633f6b8f22037a8015253c6b6a71ca82219c7"
@@ -585,7 +585,7 @@
   name = "k8s.io/api"
   packages = [
     "admission/v1beta1",
-    "admissionregistration/v1alpha2",
+    "admissionregistration/v1alpha1",
     "admissionregistration/v1beta1",
     "apps/v1",
     "apps/v1beta1",
@@ -608,13 +608,13 @@
     "networking/v1",
     "policy/v1beta1",
     "rbac/v1",
-    "rbac/v1alpha2",
+    "rbac/v1alpha1",
     "rbac/v1beta1",
-    "scheduling/v1alpha2",
+    "scheduling/v1alpha1",
     "scheduling/v1beta1",
-    "settings/v1alpha2",
+    "settings/v1alpha1",
     "storage/v1",
-    "storage/v1alpha2",
+    "storage/v1alpha1",
     "storage/v1beta1",
   ]
   pruneopts = "NT"
@@ -679,7 +679,7 @@
     "dynamic",
     "kubernetes",
     "kubernetes/scheme",
-    "kubernetes/typed/admissionregistration/v1alpha2",
+    "kubernetes/typed/admissionregistration/v1alpha1",
     "kubernetes/typed/admissionregistration/v1beta1",
     "kubernetes/typed/apps/v1",
     "kubernetes/typed/apps/v1beta1",
@@ -702,16 +702,16 @@
     "kubernetes/typed/networking/v1",
     "kubernetes/typed/policy/v1beta1",
     "kubernetes/typed/rbac/v1",
-    "kubernetes/typed/rbac/v1alpha2",
+    "kubernetes/typed/rbac/v1alpha1",
     "kubernetes/typed/rbac/v1beta1",
-    "kubernetes/typed/scheduling/v1alpha2",
+    "kubernetes/typed/scheduling/v1alpha1",
     "kubernetes/typed/scheduling/v1beta1",
-    "kubernetes/typed/settings/v1alpha2",
+    "kubernetes/typed/settings/v1alpha1",
     "kubernetes/typed/storage/v1",
-    "kubernetes/typed/storage/v1alpha2",
+    "kubernetes/typed/storage/v1alpha1",
     "kubernetes/typed/storage/v1beta1",
     "pkg/apis/clientauthentication",
-    "pkg/apis/clientauthentication/v1alpha2",
+    "pkg/apis/clientauthentication/v1alpha1",
     "pkg/apis/clientauthentication/v1beta1",
     "pkg/version",
     "plugin/pkg/client/auth/exec",
@@ -868,6 +868,7 @@
     "github.com/operator-framework/operator-sdk/pkg/ready",
     "github.com/operator-framework/operator-sdk/version",
     "github.com/stretchr/testify/assert",
+    "gopkg.in/yaml.v2",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",

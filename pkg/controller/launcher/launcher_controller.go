@@ -2,18 +2,20 @@ package launcher
 
 import (
 	"context"
-	launcherApi "fabric8-launcher/launcher-operator/pkg/apis/launcher/v1alpha2"
-	"fabric8-launcher/launcher-operator/pkg/helper"
 	"fmt"
 	"os"
 	"reflect"
 
+	launcherApi "github.com/fabric8-launcher/launcher-operator/pkg/apis/launcher/v1alpha2"
+	"github.com/fabric8-launcher/launcher-operator/pkg/helper"
+
 	"github.com/integr8ly/operator-sdk-openshift-utils/pkg/api/template"
 	appsv1 "github.com/openshift/api/apps/v1"
 	appsv1client "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
+	"gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
@@ -30,6 +32,31 @@ import (
 var log = logf.Log.WithName("controller_launcher")
 
 var templateName = "fabric8-launcher"
+
+// GitProvider config
+type GitProvider struct {
+	ID               string
+	Name             string
+	APIURL           string `yaml:"apiUrl"`
+	RepositoryURL    string `yaml:"repositoryUrl"`
+	Type             string `yaml:"type"`
+	ClientProperties struct {
+		ClientID string `yaml:"clientId"`
+	} `yaml:"clientProperties"`
+	ServerProperties struct {
+		ClientSecret string `yaml:"clientSecret"`
+		OauthURL     string `yaml:"oauthUrl"`
+	} `yaml:"serverProperties"`
+}
+
+// OpenShiftCluster config
+type OpenShiftCluster struct {
+	ID         string `yaml:"id"`
+	Name       string `yaml:"name"`
+	ApiURL     string `yaml:"apiUrl"`
+	ConsoleURL string `yaml:"consoleUrl"`
+	Type       string `yaml:"type"`
+}
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
@@ -118,7 +145,10 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	log.Info("Launcher template has been loaded")
 
-	err = r.processLauncherTemplate(tpl, instance.Namespace)
+	var params map[string]string
+	params = make(map[string]string, 1)
+	params["LAUNCHER_IMAGE_TAG"] = instance.Spec.ImageTag
+	err = r.processLauncherTemplate(params, tpl, instance.Namespace)
 
 	if err != nil {
 		return reconcile.Result{}, err
@@ -133,29 +163,93 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, fmt.Errorf("ConfigMap not found in the launcher template")
 	}
 
-	url := r.config.Host
 	data := configMap.Data
 	data["launcher.frontend.targetenvironment.skip"] = "true"
-	data["launcher.missioncontrol.openshift.api.url"] = url
+
 	if &instance.Spec.OpenShift != nil && instance.Spec.OpenShift.ConsoleURL != "" {
 		data["launcher.missioncontrol.openshift.console.url"] = instance.Spec.OpenShift.ConsoleURL
 	}
-	data["launcher.keycloak.url"] = ""
-	data["launcher.keycloak.realm"] = ""
+
+	data["launcher.missioncontrol.openshift.api.url"] = ""
+	if &instance.Spec.OpenShift != nil && instance.Spec.OpenShift.ApiURL != "" {
+		data["launcher.missioncontrol.openshift.api.url"] = instance.Spec.OpenShift.ApiURL
+	}
+
+	clusterConfig := r.findObjectByKindAndName(resourceObjects, "launcher-clusters", "ConfigMap").(*corev1.ConfigMap)
+	if &instance.Spec.OpenShift != nil && &instance.Spec.OpenShift.Clusters != nil && len(instance.Spec.OpenShift.Clusters) > 0 {
+		openshiftClusters := []OpenShiftCluster{}
+
+		for _, cluster := range instance.Spec.OpenShift.Clusters {
+			openshiftClusters = append(openshiftClusters, OpenShiftCluster{
+				ID:         cluster.ID,
+				Name:       cluster.Name,
+				ApiURL:     cluster.ApiURL,
+				ConsoleURL: cluster.ConsoleURL,
+				Type:       cluster.Type,
+			})
+		}
+
+		d, err := yaml.Marshal(&openshiftClusters)
+		if err == nil {
+			clusterConfig.Data["openshift-clusters.yaml"] = string(d)
+		}
+	}
 
 	if &instance.Spec.OAuth != nil && instance.Spec.OAuth.Enabled {
 		if &instance.Spec.OpenShift == nil || instance.Spec.OpenShift.ConsoleURL == "" {
 			return reconcile.Result{}, fmt.Errorf("OpenShift ConsoleUrl must be defined to use OAuth")
 		}
-		data["launcher.oauth.openshift.url"] = instance.Spec.OpenShift.ConsoleURL + "/oauth/authorize"
-	} else if &instance.Spec.GitHub.Token != nil {
-		token, err := r.getSensitiveValue(instance.Namespace, instance.Spec.GitHub.Token)
+		gitProvidersData := clusterConfig.Data["git-providers.yaml"]
+		gitProviders := []GitProvider{}
+		err := yaml.Unmarshal([]byte(gitProvidersData), &gitProviders)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		for _, gitConfig := range instance.Spec.Git.GitProviders {
+			index := findByID(gitProviders, gitConfig.ID)
+			if index == -1 {
+				return reconcile.Result{}, fmt.Errorf("could not find git provider config with ID: '%s'", gitConfig.ID)
+			}
+			gitProviders[index].ClientProperties.ClientID = gitConfig.ClientID
+			gitProviders[index].ServerProperties.ClientSecret = gitConfig.ClientSecret
+			gitProviders[index].ServerProperties.OauthURL = gitConfig.OauthURL
+		}
+		d, err := yaml.Marshal(&gitProviders)
+		if err == nil {
+			clusterConfig.Data["git-providers.yaml"] = string(d)
+		}
+		if instance.Spec.OAuth.KeycloakURL != "" {
+			data["launcher.keycloak.url"] = instance.Spec.OAuth.KeycloakURL
+			data["launcher.keycloak.realm"] = instance.Spec.OAuth.KeycloakRealm
+			data["launcher.keycloak.client.id"] = instance.Spec.OAuth.KeycloakClientID
+		} else {
+			data["launcher.oauth.openshift.url"] = instance.Spec.OpenShift.ConsoleURL + "/oauth/authorize"
+		}
+	} else if &instance.Spec.Git.Token != nil {
+		token, err := r.getSensitiveValue(instance.Namespace, instance.Spec.Git.Token)
 
 		if err != nil {
 			return reconcile.Result{}, err
 		}
 
 		data["launcher.missioncontrol.github.token"] = token
+	}
+
+	if &instance.Spec.Catalog != nil {
+		if instance.Spec.Catalog.RepositoryURL != "" {
+			data["launcher.backend.catalog.git.repository"] = instance.Spec.Catalog.RepositoryURL
+		}
+		if instance.Spec.Catalog.RepositoryRef != "" {
+			data["launcher.backend.catalog.git.ref"] = instance.Spec.Catalog.RepositoryRef
+		}
+		data["launcher.backend.catalog.filter"] = instance.Spec.Catalog.Filter
+		data["launcher.backend.catalog.reindex.token"] = instance.Spec.Catalog.ReindexToken
+	}
+
+	if &instance.Spec.Filter != nil {
+		data["launcher.filter.runtime"] = instance.Spec.Filter.Runtime
+		data["launcher.filter.version"] = instance.Spec.Filter.Version
 	}
 
 	isUpdated, err := r.updateConfigIfChanged(instance, configMap)
@@ -166,7 +260,7 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	if isUpdated {
 		log.Info("The config has been updated, a new deployment should be triggered")
-		for _, deploymentConfigName := range []string{"launcher-backend", "launcher-creator-backend", "launcher-frontend"} {
+		for _, deploymentConfigName := range []string{"launcher-application"} {
 			err = r.deployLatest(instance.Namespace, deploymentConfigName)
 			if err != nil {
 				return reconcile.Result{}, err
@@ -182,6 +276,15 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	}
 	return reconcile.Result{}, nil
+}
+
+func findByID(gitProviders []GitProvider, id string) int {
+	for index, provider := range gitProviders {
+		if provider.ID == id {
+			return index
+		}
+	}
+	return -1
 }
 
 func (r *ReconcileLauncher) filterResourcesObjects(obj *runtime.Object) error {
@@ -219,8 +322,8 @@ func (r *ReconcileLauncher) loadLauncherTemplate() (*template.Tmpl, error) {
 	return templateHelper.Load(r.config, templatePath, templateName)
 }
 
-func (r *ReconcileLauncher) processLauncherTemplate(template *template.Tmpl, namespace string) error {
-	return template.Process(nil, namespace)
+func (r *ReconcileLauncher) processLauncherTemplate(params map[string]string, template *template.Tmpl, namespace string) error {
+	return template.Process(params, namespace)
 }
 
 func (r *ReconcileLauncher) findObjectByKindAndName(objects []runtime.Object, name string, kind string) runtime.Object {

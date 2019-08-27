@@ -9,7 +9,6 @@ spec:
     repositoryRef: master
     filter: filter expression
     reindexToken: token
-  creator: false
   openshift:
     apiUrl: apiUrl (default is the same cluster as the operator is installed)
     consoleUrl: consoleUrl
@@ -68,10 +67,6 @@ spec:
         secretKeyRef:
           name: github-test-secret
           key: token
-  jms:
-    url: optional jms connection url
-    username: jms connection username
-    password: jms connection password or valueFrom/secretKeyRef
   keycloak:
     url: https://sso.openshift.io/auth
     realm: rh-developers-launch
@@ -79,6 +74,5 @@ spec:
   segment:
     token: token
   sentry:
-    creatorToken: value or valueFrom/secretKeyRef
     backendToken: value or valueFrom/secretKeyRef
     frontendToken: value or valueFrom/secretKeyRef

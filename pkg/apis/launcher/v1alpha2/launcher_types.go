@@ -11,24 +11,64 @@ import (
 type LauncherSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	GitHub    GitHubConfig    `json:"github"`
+	Git       GitConfig       `json:"git"`
 	OpenShift OpenShiftConfig `json:"openshift,omitempty"`
 	OAuth     OAuthConfig     `json:"oauth,omitempty"`
+	Catalog   CatalogConfig   `json:"catalog,omitempty"`
+	Filter    FilterConfig    `json:"filter,omitempty"`
+	ImageTag  string          `json:"imageTag,omitempty"`
 }
 
 // OAuthConfig defines the OAuth configuration
 type OAuthConfig struct {
-	Enabled bool `json:"enabled"`
+	Enabled          bool   `json:"enabled"`
+	KeycloakURL      string `json:"keycloakUrl,omitempty"`
+	KeycloakRealm    string `json:"keycloakRealm,omitempty"`
+	KeycloakClientID string `json:"keycloakClientId,omitempty"`
 }
 
 // OpenShiftConfig defines the OpenShift configuration
 type OpenShiftConfig struct {
-	ConsoleURL string `json:"consoleUrl,omitempty"`
+	ApiURL     string                   `json:"apiUrl,omitempty"`
+	ConsoleURL string                   `json:"consoleUrl,omitempty"`
+	Clusters   []OpenShiftClusterConfig `json:"clusters,omitempty"`
 }
 
-// GitHubConfig defines the Git configuration
-type GitHubConfig struct {
-	Token SensitiveValue `json:"token,omitempty"`
+// OpenShiftClusterConfig defines an OpenShift cluster configuration
+type OpenShiftClusterConfig struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	ApiURL     string `json:"apiUrl"`
+	ConsoleURL string `json:"consoleUrl"`
+	Type       string `json:"type"`
+}
+
+// GitConfig defines the Git configuration
+type GitConfig struct {
+	Token        SensitiveValue      `json:"token,omitempty"`
+	GitProviders []GitProviderConfig `json:"providers,omitempty"`
+}
+
+// GitProviderConfig defines the Git configuration
+type GitProviderConfig struct {
+	ID           string `json:"id,omitempty"`
+	ClientID     string `json:"clientId,omitempty"`
+	ClientSecret string `json:"clientSecret,omitempty"`
+	OauthURL     string `json:"oauthUrl,omitempty"`
+}
+
+// FilterConfig defines the filter configuration
+type FilterConfig struct {
+	Runtime string `json:"runtime,omitempty"`
+	Version string `json:"version,omitempty"`
+}
+
+// CatalogConfig defines the Catalog configuration
+type CatalogConfig struct {
+	RepositoryURL string `json:"repositoryUrl,omitempty"`
+	RepositoryRef string `json:"repositoryRef,omitempty"`
+	Filter        string `json:"filter,omitempty"`
+	ReindexToken  string `json:"reindexToken,omitempty"`
 }
 
 // SensitiveValue defines a sensitive value
