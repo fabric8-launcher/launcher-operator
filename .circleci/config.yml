@@ -5,9 +5,10 @@ jobs:
       # specify the version
       - image: circleci/golang:1.12
 
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    working_directory: /go/src/github.com/fabric8-launcher/launcher-operator
     steps:
       - checkout
+      - setup_remote_docker
       - run:
          name: Install operator-framework
          command: |
@@ -20,3 +21,14 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - run: dep ensure -v
       - run: operator-sdk generate k8s
+      - run: operator-sdk build fabric8/launcher-operator:latest
+      # build and push Docker image
+      - run: 
+          name: Build and push to Dockerhub
+          command: |
+            TAG=$(echo $CIRCLE_SHA1 | cut -c1-7)
+            echo Tag is $TAG
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker tag fabric8/launcher-operator:latest fabric8/launcher-operator:$TAG
+            docker push fabric8/launcher-operator:latest
+            docker push fabric8/launcher-operator:$TAG
