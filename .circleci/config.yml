@@ -27,6 +27,7 @@ jobs:
           name: Build and push to Dockerhub
           command: |
             TAG=$(echo $GIT_COMMIT | cut -c1-7)
+            echo Tag is $TAG
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker tag fabric8/launcher-operator:latest fabric8/launcher-operator:$TAG
             docker push fabric8/launcher-operator:latest
