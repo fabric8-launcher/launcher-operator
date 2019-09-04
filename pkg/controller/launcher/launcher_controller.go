@@ -146,8 +146,10 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 	log.Info("Launcher template has been loaded")
 
 	var params map[string]string
-	params = make(map[string]string, 1)
-	params["LAUNCHER_IMAGE_TAG"] = instance.Spec.ImageTag
+	if instance.Spec.ImageTag != "" {
+		params = make(map[string]string, 1)
+		params["LAUNCHER_IMAGE_TAG"] = instance.Spec.ImageTag
+	}
 	err = r.processLauncherTemplate(params, tpl, instance.Namespace)
 
 	if err != nil {
