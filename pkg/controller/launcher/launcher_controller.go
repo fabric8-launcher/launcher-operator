@@ -230,7 +230,7 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 			data["launcher.keycloak.realm"] = instance.Spec.OAuth.KeycloakRealm
 			data["launcher.keycloak.client.id"] = instance.Spec.OAuth.KeycloakClientID
 		} else {
-			if instance.Spec.OAuth.OauthURL != "" {
+			if instance.Spec.OAuth.OauthURL == "" {
 				data["launcher.oauth.openshift.url"] = instance.Spec.OpenShift.ConsoleURL + "/oauth/authorize"
 			} else {
 				data["launcher.oauth.openshift.url"] = instance.Spec.OAuth.OauthURL
