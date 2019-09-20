@@ -221,12 +221,23 @@ func (r *ReconcileLauncher) Reconcile(request reconcile.Request) (reconcile.Resu
 		if err == nil {
 			clusterConfig.Data["git-providers.yaml"] = string(d)
 		}
+
+		data["launcher.missioncontrol.openshift.password"] = ""
+		data["launcher.missioncontrol.openshift.username"] = ""
+
 		if instance.Spec.OAuth.KeycloakURL != "" {
 			data["launcher.keycloak.url"] = instance.Spec.OAuth.KeycloakURL
 			data["launcher.keycloak.realm"] = instance.Spec.OAuth.KeycloakRealm
 			data["launcher.keycloak.client.id"] = instance.Spec.OAuth.KeycloakClientID
 		} else {
-			data["launcher.oauth.openshift.url"] = instance.Spec.OpenShift.ConsoleURL + "/oauth/authorize"
+			if instance.Spec.OAuth.OauthURL == "" {
+				data["launcher.oauth.openshift.url"] = instance.Spec.OpenShift.ConsoleURL + "/oauth/authorize"
+			} else {
+				data["launcher.oauth.openshift.url"] = instance.Spec.OAuth.OauthURL
+			}
+			data["launcher.keycloak.url"] = ""
+			data["launcher.keycloak.realm"] = ""
+			data["launcher.keycloak.client.id"] = ""
 		}
 	} else if &instance.Spec.Git.Token != nil {
 		token, err := r.getSensitiveValue(instance.Namespace, instance.Spec.Git.Token)

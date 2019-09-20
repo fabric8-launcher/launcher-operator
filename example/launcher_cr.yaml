@@ -12,9 +12,13 @@ spec:
 ####### OAuth Configuration
   oauth:
     enabled: true
-    keycloakUrl: http://keycloakUrl
-    keycloakRealm: launcher
-    keycloakClientId: launcher
+#    keycloakUrl: http://keycloakUrl
+#    keycloakRealm: launcher
+#    keycloakClientId: launcher
+
+    # see: https://docs.openshift.com/container-platform/4.1/authentication/configuring-internal-oauth.html#oauth-server-metadata_configuring-internal-oauth
+    # for 3.x you can omit this
+    url: # https://oauth-openshift.apps-crc.testing#
 
   git:
     providers:
