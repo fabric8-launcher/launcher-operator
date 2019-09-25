@@ -25,3 +25,4 @@ spec:
     - id: GitHub
       clientId: "12"
       clientSecret: "12"
+      oauthUrl: "https://github.com/login/oauth/access_token"
